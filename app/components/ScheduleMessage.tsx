@@ -92,7 +92,12 @@ export default function ScheduleMessage({ onScheduled }: Props) {
       return
     }
 
-    const cleanPhone = phoneNumber.replace(/\D/g, '')
+    // Strip non-digits, then strip country code prefix if it was baked in
+    // (e.g. Google contact returned "521234567890" with countryCode "52")
+    let cleanPhone = phoneNumber.replace(/\D/g, '')
+    if (cleanPhone.startsWith(countryCode) && cleanPhone.length > countryCode.length + 5) {
+      cleanPhone = cleanPhone.slice(countryCode.length)
+    }
     if (cleanPhone.length < 7) {
       setError('El número parece muy corto')
       return
@@ -227,13 +232,20 @@ export default function ScheduleMessage({ onScheduled }: Props) {
         <label className="card-label">
           Fecha y hora del recordatorio
         </label>
-        <div style={{ display: 'block', width: '100%', overflow: 'hidden' }}>
+        <div style={{ width: '100%', overflow: 'hidden', borderRadius: '8px' }}>
           <input
             type="datetime-local"
             value={scheduledAt}
             onChange={(e) => setScheduledAt(e.target.value)}
             className="input-field"
-            style={{ display: 'block', width: '100%', maxWidth: '100%', minWidth: '0', boxSizing: 'border-box', paddingRight: '12px' }}
+            style={{
+              width: 'calc(100% + 1px)',
+              maxWidth: 'calc(100% + 1px)',
+              minWidth: '0',
+              boxSizing: 'border-box',
+              display: 'block',
+              marginRight: '-1px',
+            }}
             required
           />
         </div>

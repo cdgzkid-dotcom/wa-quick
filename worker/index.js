@@ -61,10 +61,11 @@ self.addEventListener('notificationclick', (event) => {
       )
 
       if (appClient) {
-        // Store in SW global so the page can fetch it via GET_PENDING_DEEP_LINK
-        pendingDeepLink = { phone, countryCode, message }
-        // Try postMessage (may fail on iOS when app is in background)
-        appClient.postMessage({ type: 'NOTIFICATION_TAP', phone, countryCode, message })
+        // Only store / postMessage when we actually have the phone data
+        if (phone && countryCode) {
+          pendingDeepLink = { phone, countryCode, message }
+          appClient.postMessage({ type: 'NOTIFICATION_TAP', phone, countryCode, message })
+        }
         return appClient.focus()
       }
 

@@ -54,6 +54,9 @@ export async function GET(request: NextRequest) {
         phone = phone.slice(cc.length)
       }
 
+      console.log('[cron] msg id=%s | stored phoneNumber=%s | countryCode=%s | resolved phone=%s | message=%s',
+        msg._id, msg.phoneNumber, cc, phone, msg.message || '')
+
       const fullPhone = `${cc}${phone}`
       const waUrl = `https://wa.me/${fullPhone}${msg.message ? `?text=${encodeURIComponent(msg.message)}` : ''}`
 
