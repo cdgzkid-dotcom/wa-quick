@@ -48,12 +48,10 @@ self.addEventListener('notificationclick', (event) => {
 
   if (action === 'dismiss') return
 
-  // Default body tap → always open/navigate to the deep link URL with params.
-  // Using openWindow unconditionally is the most reliable approach on iOS PWA —
-  // postMessage from SW background is unreliable; openWindow navigates the
-  // existing standalone window to the new URL, which page.tsx reads on mount.
+  // Default body tap: open the app with short URL params.
+  // page.tsx polls window.location.search after focus to pick them up.
   const scope   = self.registration.scope.replace(/\/$/, '')
-  const deepUrl = `${scope}/?tab=quick&phone=${encodeURIComponent(phone)}&countryCode=${encodeURIComponent(countryCode)}&message=${encodeURIComponent(message)}`
+  const deepUrl = `${scope}/?phone=${encodeURIComponent(phone)}&cc=${encodeURIComponent(countryCode)}&msg=${encodeURIComponent(message)}`
 
   event.waitUntil(clients.openWindow(deepUrl))
 })

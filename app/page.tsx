@@ -46,17 +46,24 @@ function AppContent() {
     return () => clearInterval(cronInterval)
   }, [])
 
-  // On mount: read URL params and clean them (handles app opened fresh from notification)
+  // Read URL params on mount + poll 2 more times (iOS PWA may deliver the URL
+  // after the component is already mounted when the app was in background)
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const phone  = params.get('phone')
-    if (phone) {
-      const message     = params.get('message')     || ''
-      const countryCode = params.get('countryCode') || '52'
-      setDeepLink({ phone, message, countryCode })
-      setActiveTab('quick')
-      window.history.replaceState({}, '', '/?tab=quick')
+    const check = () => {
+      const params = new URLSearchParams(window.location.search)
+      const phone  = params.get('phone')
+      const cc     = params.get('cc')
+      const msg    = params.get('msg')
+      if (phone && cc) {
+        setDeepLink({ phone, countryCode: cc, message: msg || '' })
+        setActiveTab('quick')
+        history.replaceState({}, '', '/')
+      }
     }
+    check()
+    const t1 = setTimeout(check, 500)
+    const t2 = setTimeout(check, 1000)
+    return () => { clearTimeout(t1); clearTimeout(t2) }
   }, [])
 
   // SW now uses openWindow(deepUrl) — deep link arrives via URL params, handled above.
