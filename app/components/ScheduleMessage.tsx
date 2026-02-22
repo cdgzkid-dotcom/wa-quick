@@ -103,6 +103,8 @@ export default function ScheduleMessage({ onScheduled }: Props) {
       return
     }
 
+    console.log('[ScheduleMessage] saving → phoneNumber=%s | countryCode=%s | message=%s', cleanPhone, countryCode, message)
+
     setLoading(true)
 
     try {
@@ -232,7 +234,7 @@ export default function ScheduleMessage({ onScheduled }: Props) {
         <label className="card-label">
           Fecha y hora del recordatorio
         </label>
-        <div style={{ width: '100%', overflow: 'hidden', borderRadius: '8px' }}>
+        <div style={{ width: '100%', overflow: 'hidden', borderRadius: '0.75rem' }}>
           <input
             type="datetime-local"
             value={scheduledAt}

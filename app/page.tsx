@@ -59,8 +59,8 @@ function AppContent() {
     }
   }, [])
 
-  // Listen for postMessage from the service worker (NOTIFICATION_TAP)
-  // Also fires when SW responds to GET_PENDING_DEEP_LINK (iOS fallback)
+  // SW now uses openWindow(deepUrl) — deep link arrives via URL params, handled above.
+  // Keep a postMessage listener as a desktop/non-iOS fallback.
   useEffect(() => {
     if (!('serviceWorker' in navigator)) return
 
@@ -73,21 +73,6 @@ function AppContent() {
 
     navigator.serviceWorker.addEventListener('message', handler)
     return () => navigator.serviceWorker.removeEventListener('message', handler)
-  }, [])
-
-  // When app comes to foreground, ask SW for any pending deep link (iOS fallback)
-  useEffect(() => {
-    if (!('serviceWorker' in navigator)) return
-
-    const onVisible = () => {
-      if (document.visibilityState !== 'visible') return
-      navigator.serviceWorker.ready
-        .then((reg) => reg.active?.postMessage({ type: 'GET_PENDING_DEEP_LINK' }))
-        .catch(() => {})
-    }
-
-    document.addEventListener('visibilitychange', onVisible)
-    return () => document.removeEventListener('visibilitychange', onVisible)
   }, [])
 
   const handleTabChange = (tab: Tab) => {

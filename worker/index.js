@@ -1,8 +1,6 @@
 // Custom worker code merged into next-pwa service worker
 // This handles push notifications
 
-// SW-global pending deep link — page can request it via GET_PENDING_DEEP_LINK message
-let pendingDeepLink = null
 
 self.addEventListener('push', (event) => {
   if (!event.data) return
@@ -50,35 +48,13 @@ self.addEventListener('notificationclick', (event) => {
 
   if (action === 'dismiss') return
 
-  // Default body tap → show the send screen with data pre-filled
+  // Default body tap → always open/navigate to the deep link URL with params.
+  // Using openWindow unconditionally is the most reliable approach on iOS PWA —
+  // postMessage from SW background is unreliable; openWindow navigates the
+  // existing standalone window to the new URL, which page.tsx reads on mount.
   const scope   = self.registration.scope.replace(/\/$/, '')
   const deepUrl = `${scope}/?tab=quick&phone=${encodeURIComponent(phone)}&countryCode=${encodeURIComponent(countryCode)}&message=${encodeURIComponent(message)}`
 
-  event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
-      const appClient = windowClients.find((c) =>
-        c.url.startsWith(self.registration.scope)
-      )
-
-      if (appClient) {
-        // Only store / postMessage when we actually have the phone data
-        if (phone && countryCode) {
-          pendingDeepLink = { phone, countryCode, message }
-          appClient.postMessage({ type: 'NOTIFICATION_TAP', phone, countryCode, message })
-        }
-        return appClient.focus()
-      }
-
-      // Fallback: app is closed → open with URL params
-      return clients.openWindow(deepUrl)
-    })
-  )
+  event.waitUntil(clients.openWindow(deepUrl))
 })
 
-// Page can request the stored deep link (iOS fallback when postMessage didn't arrive)
-self.addEventListener('message', (event) => {
-  if (event.data?.type === 'GET_PENDING_DEEP_LINK' && pendingDeepLink) {
-    event.source.postMessage({ type: 'NOTIFICATION_TAP', ...pendingDeepLink })
-    pendingDeepLink = null
-  }
-})

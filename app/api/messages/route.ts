@@ -23,6 +23,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { phoneNumber, countryCode, message, scheduledAt } = body
 
+    console.log('[POST /api/messages] received → phoneNumber=%s | countryCode=%s | message=%s', phoneNumber, countryCode, message)
+
     if (!phoneNumber || !countryCode || !scheduledAt) {
       return NextResponse.json(
         { error: 'Faltan campos requeridos: número, código de país y fecha/hora' },
