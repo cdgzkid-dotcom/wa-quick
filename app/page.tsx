@@ -58,9 +58,10 @@ function AppContent() {
         const res = await fetch('/api/deeplink')
         const data = await res.json()
         console.log('[deeplink] response:', data)
-        if (!data || !data.phone || !data.countryCode) return
-        setActiveTab('quick')
-        setDeepLink({ phone: data.phone, countryCode: data.countryCode, message: data.message || '' })
+        if (data?.phone && data?.countryCode) {
+          setActiveTab('quick')
+          setDeepLink({ phone: data.phone, countryCode: data.countryCode, message: data.message || '' })
+        }
       } catch {
         // ignore network errors
       }
