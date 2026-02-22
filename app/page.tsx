@@ -46,47 +46,36 @@ function AppContent() {
     return () => clearInterval(cronInterval)
   }, [])
 
-  // Read URL params on mount + poll 2 more times (iOS PWA may deliver the URL
-  // after the component is already mounted when the app was in background)
-  useEffect(() => {
-    const check = () => {
-      const params = new URLSearchParams(window.location.search)
-      const phone  = params.get('phone')
-      const cc     = params.get('cc')
-      const msg    = params.get('msg')
-      if (phone && cc) {
-        setActiveTab('quick')
-        setDeepLink({ phone, countryCode: cc, message: msg || '' })
-        history.replaceState({}, '', '/')
-      }
-    }
-    check()
-    const t1 = setTimeout(check, 500)
-    const t2 = setTimeout(check, 1000)
-    window.addEventListener('focus', check)
-    document.addEventListener('visibilitychange', check)
-    return () => {
-      clearTimeout(t1)
-      clearTimeout(t2)
-      window.removeEventListener('focus', check)
-      document.removeEventListener('visibilitychange', check)
-    }
-  }, [])
-
-  // SW now uses openWindow(deepUrl) — deep link arrives via URL params, handled above.
-  // Keep a postMessage listener as a desktop/non-iOS fallback.
+  // Deep-link via SW global variable (works for iOS locked-screen + background resume).
+  // On focus/visibilitychange, ask the SW for any pending deep-link data.
+  // The SW responds with {type:'DEEPLINK', phone, countryCode, message}.
   useEffect(() => {
     if (!('serviceWorker' in navigator)) return
 
     const handler = (event: MessageEvent) => {
-      if (event.data?.type !== 'NOTIFICATION_TAP') return
-      const { phone, countryCode, message } = event.data as DeepLink & { type: string }
-      setDeepLink({ phone, countryCode, message })
-      setActiveTab('quick')
+      const { type, phone, countryCode, message } = event.data ?? {}
+      if ((type === 'DEEPLINK' || type === 'NOTIFICATION_TAP') && phone && countryCode) {
+        setActiveTab('quick')
+        setDeepLink({ phone, countryCode, message: message || '' })
+      }
+    }
+
+    const requestDeepLink = () => {
+      navigator.serviceWorker.controller?.postMessage('GET_DEEPLINK')
     }
 
     navigator.serviceWorker.addEventListener('message', handler)
-    return () => navigator.serviceWorker.removeEventListener('message', handler)
+    // Ask on mount (handles cold-start: app opened from closed state)
+    requestDeepLink()
+    // Ask whenever app comes to foreground (iOS background resume)
+    window.addEventListener('focus', requestDeepLink)
+    document.addEventListener('visibilitychange', requestDeepLink)
+
+    return () => {
+      navigator.serviceWorker.removeEventListener('message', handler)
+      window.removeEventListener('focus', requestDeepLink)
+      document.removeEventListener('visibilitychange', requestDeepLink)
+    }
   }, [])
 
   const handleTabChange = (tab: Tab) => {

@@ -38,21 +38,33 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close()
 
   const { action } = event
-  const { waUrl, url, phone, countryCode, message } = event.notification.data
+  const { waUrl, phone, countryCode, message } = event.notification.data
 
   if (action === 'send' && waUrl) {
-    // "Enviar ahora" button → open WhatsApp directly
     event.waitUntil(clients.openWindow(waUrl))
     return
   }
 
   if (action === 'dismiss') return
 
-  // Default body tap: open the app with short URL params.
-  // page.tsx polls window.location.search after focus to pick them up.
-  const scope   = self.registration.scope.replace(/\/$/, '')
-  const deepUrl = `${scope}/?phone=${encodeURIComponent(phone)}&cc=${encodeURIComponent(countryCode)}&msg=${encodeURIComponent(message)}`
+  // Store deep-link data in SW global so the page can request it
+  self.pendingDeepLink = { phone, countryCode, message }
 
-  event.waitUntil(clients.openWindow(deepUrl))
+  // Focus existing window (iOS resume) or open app fresh
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+      const appClient = windowClients.find((c) => c.url.startsWith(self.registration.scope))
+      if (appClient) return appClient.focus()
+      return clients.openWindow('/')
+    })
+  )
+})
+
+// Page requests stored deep-link via GET_DEEPLINK message
+self.addEventListener('message', (event) => {
+  if (event.data === 'GET_DEEPLINK' && self.pendingDeepLink) {
+    event.source.postMessage({ type: 'DEEPLINK', ...self.pendingDeepLink })
+    self.pendingDeepLink = null
+  }
 })
 
