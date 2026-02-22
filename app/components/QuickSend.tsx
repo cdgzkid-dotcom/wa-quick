@@ -77,6 +77,10 @@ export default function QuickSend({
       return [contact, ...filtered].slice(0, 5)
     })
     window.open(waUrl, '_blank')
+
+    // Clear form after sending so old values don't persist on PWA resume
+    setPhoneNumber('')
+    setMessage('')
   }
 
   const handleContactPicker = async () => {

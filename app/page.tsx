@@ -46,35 +46,28 @@ function AppContent() {
     return () => clearInterval(cronInterval)
   }, [])
 
-  // Deep-link via server: on mount and whenever the app comes to foreground,
-  // fetch /api/deeplink which returns the most recent unused pending deep-link
-  // (saved by the cron when it sent the push notification).
-  // This works on iOS locked-screen + background resume where SW messaging is unreliable.
+  // Deep-link via server polling: every 3 s (only when tab is visible).
+  // The cron saves a PendingDeepLink doc when it sends a push; we consume it here.
+  // Polling is more reliable on iOS than focus/visibilitychange events.
   useEffect(() => {
-    const checkDeepLink = () => {
+    const poll = async () => {
+      if (document.visibilityState !== 'visible') return
       console.log('[deeplink] fetching /api/deeplink')
-      fetch('/api/deeplink')
-        .then((r) => r.json())
-        .then((data) => {
-          console.log('[deeplink] response:', data)
-          if (data && data.phone && data.countryCode) {
-            setActiveTab('quick')
-            setDeepLink({ phone: data.phone, countryCode: data.countryCode, message: data.message || '' })
-          }
-        })
-        .catch(() => {})
+      try {
+        const res = await fetch('/api/deeplink')
+        const data = await res.json()
+        console.log('[deeplink] response:', data)
+        if (data?.phone && data?.countryCode) {
+          setActiveTab('quick')
+          setDeepLink({ phone: data.phone, countryCode: data.countryCode, message: data.message || '' })
+        }
+      } catch {
+        // ignore network errors
+      }
     }
 
-    // Check on mount (cold-start: app opened from closed state)
-    checkDeepLink()
-    // Check whenever app comes to foreground (iOS background resume)
-    window.addEventListener('focus', checkDeepLink)
-    document.addEventListener('visibilitychange', checkDeepLink)
-
-    return () => {
-      window.removeEventListener('focus', checkDeepLink)
-      document.removeEventListener('visibilitychange', checkDeepLink)
-    }
+    const interval = setInterval(poll, 3000)
+    return () => clearInterval(interval)
   }, [])
 
   const handleTabChange = (tab: Tab) => {
