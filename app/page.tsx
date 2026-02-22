@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, Suspense } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import QuickSend from './components/QuickSend'
 import ScheduleMessage from './components/ScheduleMessage'
@@ -25,9 +25,6 @@ function AppContent() {
   const [refreshKey, setRefreshKey] = useState(0)
   const [showSuccess, setShowSuccess] = useState(false)
 
-  // Ref so the polling interval can read the current tab without recreating itself
-  const activeTabRef = useRef(activeTab)
-  useEffect(() => { activeTabRef.current = activeTab }, [activeTab])
 
   // Deep-link state — starts from URL params, updated via postMessage from SW
   const [deepLink, setDeepLink] = useState<DeepLink>({
@@ -56,7 +53,6 @@ function AppContent() {
   useEffect(() => {
     const poll = async () => {
       if (document.visibilityState !== 'visible') return
-      if (activeTabRef.current !== 'quick') return
       console.log('[deeplink] fetching /api/deeplink')
       try {
         const res = await fetch('/api/deeplink')
