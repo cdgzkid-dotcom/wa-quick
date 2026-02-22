@@ -150,7 +150,7 @@ export default function GoogleContacts({ onSelect }: Props) {
           c.name.toLowerCase().includes(search.toLowerCase()) ||
           c.phones.some((p) => p.includes(search))
       )
-    : contacts
+    : []
 
   if (accountsLoading) return null
 
@@ -265,7 +265,7 @@ export default function GoogleContacts({ onSelect }: Props) {
                 </div>
               )}
 
-              {!contactsLoading && !contactsError && (
+              {!contactsLoading && !contactsError && search && (
                 <div className="max-h-64 overflow-y-auto -mx-1 px-1 space-y-1">
                   {filtered.slice(0, 100).map((contact, i) => (
                     <div key={i} className="rounded-xl p-2 hover:bg-gray-50 transition-colors">
@@ -302,7 +302,7 @@ export default function GoogleContacts({ onSelect }: Props) {
                     </p>
                   )}
 
-                  {contacts.length === 0 && !contactsLoading && (
+                  {contacts.length === 0 && !contactsLoading && search && (
                     <p className="text-sm text-gray-500 text-center py-6">
                       No se encontraron contactos con número de teléfono.
                     </p>
