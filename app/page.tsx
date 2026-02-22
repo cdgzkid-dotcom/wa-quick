@@ -102,15 +102,10 @@ function AppContent() {
       >
         <div className="px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center text-xl"
-              style={{
-                background: 'var(--logo-bg)',
-                border:     '1.5px solid var(--logo-border)',
-                boxShadow:  'var(--logo-shadow)',
-              }}
-            >
-              ⚡
+            <div style={{ background: '#0a0a0a', border: '1.5px solid #25D366', borderRadius: '11px', width: '38px', height: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 10px rgba(37,211,102,0.25)' }}>
+              <svg width="20" height="20" viewBox="0 0 100 100" fill="none">
+                <path d="M58 12L25 55H48L40 88L75 45H52L58 12Z" fill="#25D366"/>
+              </svg>
             </div>
             <div>
               <h1 className="text-lg font-bold leading-tight font-space" style={{ color: 'var(--text)' }}>Quick Zap</h1>
