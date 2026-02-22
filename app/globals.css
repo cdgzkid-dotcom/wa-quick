@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Theme variables ──────────────────────────────────────── */
+/* ── Theme variables ────────────────────────────────────────── */
 
 .theme-light {
   --bg:           #f5f5f5;
@@ -10,13 +10,24 @@
   --input-bg:     #f5f5f5;
   --text:         #111111;
   --text-dim:     #aaaaaa;
-  --text-muted:   #6b7280;
   --accent:       #25D366;
-  --accent-glow:  transparent;
   --border:       rgba(0,0,0,0.06);
-  --border-input: rgba(0,0,0,0.10);
+  --border-input: rgba(0,0,0,0.08);
   --hover:        rgba(0,0,0,0.04);
-  --shadow:       0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow:       0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+
+  /* Logo */
+  --logo-bg:      #f0fdf4;
+  --logo-border:  #25D366;
+  --logo-shadow:  none;
+
+  /* Phone number color */
+  --phone-color:  #075E54;
+  --phone-glow:   none;
+
+  /* Ship it now button */
+  --btn-text:     #ffffff;
+  --btn-shadow:   0 4px 16px rgba(37,211,102,0.30);
 }
 
 .theme-dark {
@@ -24,35 +35,51 @@
   --card:         #111111;
   --input-bg:     #181818;
   --text:         #e8e8e8;
-  --text-dim:     #555555;
-  --text-muted:   #888888;
+  --text-dim:     #444444;
   --accent:       #25D366;
-  --accent-glow:  rgba(37,211,102,0.25);
-  --border:       rgba(37,211,102,0.18);
-  --border-input: rgba(255,255,255,0.08);
+  --border:       rgba(255,255,255,0.05);
+  --border-input: rgba(37,211,102,0.20);
   --hover:        rgba(255,255,255,0.04);
-  --shadow:       0 1px 3px rgba(0,0,0,0.6), 0 0 0 1px rgba(37,211,102,0.12);
+  --shadow:       none;
+
+  /* Logo */
+  --logo-bg:      #181818;
+  --logo-border:  #25D366;
+  --logo-shadow:  0 0 10px rgba(37,211,102,0.25);
+
+  /* Phone number color */
+  --phone-color:  #25D366;
+  --phone-glow:   0 0 12px rgba(37,211,102,0.50);
+
+  /* Ship it now button */
+  --btn-text:     #000000;
+  --btn-shadow:   0 0 24px rgba(37,211,102,0.30);
 }
 
-/* prefers-color-scheme fallback (before JS applies theme class) */
+/* prefers-color-scheme fallback (before JS sets the class) */
 @media (prefers-color-scheme: dark) {
   html:not(.theme-light):not(.theme-dark) {
     --bg:           #0a0a0a;
     --card:         #111111;
     --input-bg:     #181818;
     --text:         #e8e8e8;
-    --text-dim:     #555555;
-    --text-muted:   #888888;
+    --text-dim:     #444444;
     --accent:       #25D366;
-    --accent-glow:  rgba(37,211,102,0.25);
-    --border:       rgba(37,211,102,0.18);
-    --border-input: rgba(255,255,255,0.08);
+    --border:       rgba(255,255,255,0.05);
+    --border-input: rgba(37,211,102,0.20);
     --hover:        rgba(255,255,255,0.04);
-    --shadow:       0 1px 3px rgba(0,0,0,0.6), 0 0 0 1px rgba(37,211,102,0.12);
+    --shadow:       none;
+    --logo-bg:      #181818;
+    --logo-border:  #25D366;
+    --logo-shadow:  0 0 10px rgba(37,211,102,0.25);
+    --phone-color:  #25D366;
+    --phone-glow:   0 0 12px rgba(37,211,102,0.50);
+    --btn-text:     #000000;
+    --btn-shadow:   0 0 24px rgba(37,211,102,0.30);
   }
 }
 
-/* ── Base ─────────────────────────────────────────────────── */
+/* ── Base ───────────────────────────────────────────────────── */
 
 @layer base {
   body {
@@ -63,98 +90,133 @@
   }
 }
 
-/* ── Component classes ────────────────────────────────────── */
+/* ── Component classes ──────────────────────────────────────── */
 
 @layer components {
+
+  /* Card container */
+  .card {
+    background:  var(--card, #fff);
+    border:      1px solid var(--border, rgba(0,0,0,0.06));
+    box-shadow:  var(--shadow, 0 1px 3px rgba(0,0,0,0.07));
+    @apply rounded-2xl p-4;
+  }
+
+  /* Standard input / textarea / select */
+  .input-field {
+    background:  var(--input-bg, #f5f5f5);
+    color:       var(--text, #111);
+    border:      1px solid var(--border-input, rgba(0,0,0,0.08));
+    font-family: inherit;
+    @apply w-full px-4 py-3 rounded-xl
+           focus:outline-none focus:ring-2 focus:ring-whatsapp-green focus:border-transparent
+           text-base;
+  }
+  .input-field::placeholder { color: var(--text-dim, #aaa); }
+
+  /* Card section label — 9px Space Mono */
+  .card-label {
+    display:        block;
+    font-size:      9px;
+    font-family:    var(--font-space-mono, monospace);
+    font-weight:    700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color:          var(--text-dim, #aaa);
+    margin-bottom:  12px;
+  }
+
+  /* Phone number input — themed colour + glow */
+  .phone-input {
+    color:       var(--phone-color, #111);
+    text-shadow: var(--phone-glow, none);
+    font-family: var(--font-space-mono, monospace);
+    caret-color: var(--phone-color, #111);
+  }
+
+  /* Ship it now button */
+  .btn-ship {
+    width:           100%;
+    background:      #25D366;
+    color:           var(--btn-text, #fff);
+    font-family:     var(--font-space-mono, monospace);
+    font-size:       1.125rem;
+    font-weight:     700;
+    padding:         14px 24px;
+    border-radius:   9999px;
+    box-shadow:      var(--btn-shadow, 0 4px 16px rgba(37,211,102,0.30));
+    display:         flex;
+    align-items:     center;
+    justify-content: center;
+    gap:             8px;
+    border:          none;
+    cursor:          pointer;
+    transition:      opacity 0.15s, box-shadow 0.15s;
+  }
+  .btn-ship:disabled  { opacity: 0.45; cursor: not-allowed; }
+  .btn-ship:active:not(:disabled) { opacity: 0.82; }
+
+  /* Legacy buttons kept for ScheduleMessage / ScheduledList */
   .btn-primary {
     @apply bg-whatsapp-green text-white font-semibold py-3 px-6 rounded-full
-           active:bg-whatsapp-dark transition-colors duration-150
+           active:opacity-80 transition-opacity duration-150
            disabled:opacity-50 disabled:cursor-not-allowed
            flex items-center justify-center gap-2;
   }
-
   .btn-secondary {
     @apply bg-transparent text-whatsapp-teal font-semibold py-3 px-6 rounded-full
-           border-2 border-whatsapp-green active:opacity-70
-           transition-colors duration-150
+           border-2 border-whatsapp-green active:opacity-70 transition-opacity duration-150
            disabled:opacity-50 disabled:cursor-not-allowed
            flex items-center justify-center gap-2;
   }
-
   .btn-danger {
     @apply bg-red-500 text-white font-semibold py-2 px-4 rounded-full
            active:bg-red-700 transition-colors duration-150
            flex items-center justify-center gap-2;
   }
 
-  .card {
-    background:    var(--card, #fff);
-    border:        1px solid var(--border, rgba(0,0,0,0.06));
-    box-shadow:    var(--shadow, 0 1px 3px rgba(0,0,0,0.08));
-    @apply rounded-2xl p-4;
-  }
-
-  .input-field {
-    background:    var(--input-bg, #fff);
-    color:         var(--text, #111);
-    border:        1px solid var(--border-input, rgba(0,0,0,0.10));
-    font-family:   inherit;
-    @apply w-full px-4 py-3 rounded-xl
-           focus:outline-none focus:ring-2 focus:ring-whatsapp-green focus:border-transparent
-           text-base;
-  }
-
-  .input-field::placeholder {
-    color: var(--text-dim, #aaa);
-  }
-
-  /* Space Mono helper — apply to phone inputs and title */
-  .font-space {
-    font-family: var(--font-space-mono, monospace);
-  }
+  /* Space Mono shorthand */
+  .font-space { font-family: var(--font-space-mono, monospace); }
 }
 
-/* ── Dark mode overrides for Tailwind inline classes ──────── */
+/* ── Dark-mode overrides for Tailwind hardcoded classes ─────── */
 
 /* Backgrounds */
-.theme-dark .bg-white            { background-color: var(--card)  !important; }
-.theme-dark .bg-gray-50          { background-color: var(--hover)  !important; }
-.theme-dark .bg-gray-100         { background-color: rgba(255,255,255,0.06) !important; }
-.theme-dark .bg-whatsapp-light   { background-color: rgba(37,211,102,0.12)  !important; }
-.theme-dark .bg-red-50           { background-color: rgba(220,38,38,0.12)   !important; }
-.theme-dark .bg-blue-50          { background-color: rgba(59,130,246,0.12)  !important; }
+.theme-dark .bg-white          { background-color: var(--card)  !important; }
+.theme-dark .bg-gray-50        { background-color: var(--hover) !important; }
+.theme-dark .bg-gray-100       { background-color: rgba(255,255,255,0.06) !important; }
+.theme-dark .bg-whatsapp-light { background-color: rgba(37,211,102,0.12) !important; }
+.theme-dark .bg-red-50         { background-color: rgba(220,38,38,0.12)  !important; }
+.theme-dark .bg-blue-50        { background-color: rgba(59,130,246,0.12) !important; }
 
 /* Text */
 .theme-dark .text-gray-900,
-.theme-dark .text-gray-800       { color: var(--text)         !important; }
-.theme-dark .text-gray-700       { color: #d0d0d0             !important; }
-.theme-dark .text-gray-600       { color: #aaaaaa             !important; }
-.theme-dark .text-gray-500       { color: var(--text-muted)   !important; }
-.theme-dark .text-gray-400       { color: var(--text-dim)     !important; }
-.theme-dark .text-red-600        { color: #f87171             !important; }
-.theme-dark .text-blue-600       { color: #60a5fa             !important; }
-.theme-dark .placeholder-gray-400::placeholder { color: var(--text-dim) !important; }
+.theme-dark .text-gray-800     { color: var(--text)      !important; }
+.theme-dark .text-gray-700     { color: #cccccc          !important; }
+.theme-dark .text-gray-600     { color: #aaaaaa          !important; }
+.theme-dark .text-gray-500     { color: #888888          !important; }
+.theme-dark .text-gray-400     { color: var(--text-dim)  !important; }
+.theme-dark .text-red-600      { color: #f87171          !important; }
+.theme-dark .text-blue-600     { color: #60a5fa          !important; }
 
 /* Borders */
 .theme-dark .border-gray-100,
-.theme-dark .border-gray-200     { border-color: var(--border) !important; }
-.theme-dark .border-red-100      { border-color: rgba(220,38,38,0.2) !important; }
+.theme-dark .border-gray-200   { border-color: var(--border) !important; }
+.theme-dark .border-red-100    { border-color: rgba(220,38,38,0.2)  !important; }
 
-/* Shadows / dropdowns */
-.theme-dark .shadow-xl           { box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(37,211,102,0.12) !important; }
-.theme-dark .shadow-sm           { box-shadow: var(--shadow) !important; }
+/* Dropdowns / overlays */
+.theme-dark .shadow-xl         { box-shadow: 0 20px 60px rgba(0,0,0,0.85),
+                                             0 0 0 1px rgba(255,255,255,0.06) !important; }
 
-/* Hover states */
+/* Hover rows */
 .theme-dark .hover\:bg-gray-50:hover { background-color: var(--hover) !important; }
 
-/* Focus glow in dark mode */
+/* Input focus glow in dark */
 .theme-dark .input-field:focus {
-  box-shadow: 0 0 0 3px var(--accent-glow) !important;
+  box-shadow: 0 0 0 3px rgba(37,211,102,0.20) !important;
 }
 
-/* ── Smooth scrolling ─────────────────────────────────────── */
+/* ── Utilities ──────────────────────────────────────────────── */
 html { scroll-behavior: smooth; }
-
-/* ── PWA safe areas ──────────────────────────────────────── */
 .safe-top    { padding-top:    env(safe-area-inset-top); }
 .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }

@@ -119,8 +119,7 @@ export default function QuickSend({
 
       {/* ── Phone number card ── */}
       <div className="card">
-        <label className="block text-xs font-semibold uppercase tracking-wide mb-3"
-          style={{ color: 'var(--text-muted)' }}>
+        <label className="card-label">
           Número de WhatsApp
         </label>
 
@@ -163,7 +162,7 @@ export default function QuickSend({
             value={phoneNumber}
             onChange={(e) => setPhoneNumber(e.target.value)}
             placeholder="1234567890"
-            className="input-field flex-1 min-w-0 font-space"
+            className="input-field phone-input flex-1 min-w-0"
           />
         </div>
 
@@ -191,8 +190,7 @@ export default function QuickSend({
 
       {/* ── Message card ── */}
       <div className="card">
-        <label className="block text-xs font-semibold uppercase tracking-wide mb-3"
-          style={{ color: 'var(--text-muted)' }}>
+        <label className="card-label">
           Mensaje (opcional)
         </label>
         <textarea
@@ -208,7 +206,7 @@ export default function QuickSend({
       <button
         onClick={handleSend}
         disabled={!phoneNumber.trim()}
-        className="btn-primary w-full text-lg font-space"
+        className="btn-ship"
       >
         🚀 Ship it now!!
       </button>
