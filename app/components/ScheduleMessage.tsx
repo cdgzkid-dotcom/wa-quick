@@ -129,15 +129,6 @@ export default function ScheduleMessage({ onScheduled }: Props) {
     }
   }
 
-  // Quick time presets
-  const setQuickTime = (minutes: number) => {
-    const d = new Date()
-    d.setMinutes(d.getMinutes() + minutes)
-    d.setSeconds(0)
-    d.setMilliseconds(0)
-    setScheduledAt(d.toISOString().slice(0, 16))
-  }
-
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Phone input */}
@@ -235,32 +226,11 @@ export default function ScheduleMessage({ onScheduled }: Props) {
         <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
           Fecha y hora del recordatorio
         </label>
-
-        {/* Quick presets */}
-        <div className="flex gap-2 mb-3 flex-wrap">
-          {[
-            { label: '30 min', value: 30 },
-            { label: '1 hora', value: 60 },
-            { label: '2 horas', value: 120 },
-            { label: 'Mañana', value: 24 * 60 },
-          ].map((preset) => (
-            <button
-              key={preset.label}
-              type="button"
-              onClick={() => setQuickTime(preset.value)}
-              className="text-xs bg-whatsapp-light text-whatsapp-teal px-3 py-1.5 rounded-full font-medium active:bg-whatsapp-green active:text-white transition-colors"
-            >
-              {preset.label}
-            </button>
-          ))}
-        </div>
-
         <input
           type="datetime-local"
           value={scheduledAt}
           onChange={(e) => setScheduledAt(e.target.value)}
-
-          className="input-field"
+          className="input-field w-full"
           required
         />
       </div>

@@ -70,6 +70,15 @@ export default function QuickSend({ initialPhone = '', initialMessage = '', init
     setHasContactPicker('contacts' in navigator)
   }, [])
 
+  // Sync initial values when arriving via deep link (notification tap)
+  useEffect(() => {
+    if (initialPhone) {
+      setPhoneNumber(initialPhone)
+      setMessage(initialMessage)
+      setCountryCode(initialCountryCode)
+    }
+  }, [initialPhone, initialMessage, initialCountryCode])
+
   const selectedCountry = COUNTRY_CODES.find((c) => c.code === countryCode)
 
   const handleDialKey = (key: string) => {

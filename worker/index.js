@@ -56,7 +56,10 @@ self.addEventListener('notificationclick', (event) => {
           c.url.startsWith(self.registration.scope)
         )
         if (appClient) {
-          appClient.navigate(targetUrl)
+          // navigate() updates the URL and triggers a full navigation in the client
+          if ('navigate' in appClient) {
+            return appClient.navigate(targetUrl).then((c) => c && c.focus())
+          }
           return appClient.focus()
         }
         return clients.openWindow(targetUrl)

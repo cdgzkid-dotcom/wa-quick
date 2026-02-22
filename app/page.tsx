@@ -2,15 +2,10 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import dynamic from 'next/dynamic'
 import QuickSend from './components/QuickSend'
 import ScheduleMessage from './components/ScheduleMessage'
 import ScheduledList from './components/ScheduledList'
-
-const PushNotifications = dynamic(() => import('./components/PushNotifications'), {
-  ssr: false,
-  loading: () => null,
-})
+import BellButton from './components/BellButton'
 
 type Tab = 'quick' | 'schedule' | 'scheduled'
 
@@ -58,23 +53,26 @@ function AppContent() {
   }
 
   const tabs: { id: Tab; label: string; icon: string }[] = [
-    { id: 'quick', label: 'Enviar', icon: '📤' },
-    { id: 'schedule', label: 'Programar', icon: '⏰' },
-    { id: 'scheduled', label: 'Agenda', icon: '📋' },
+    { id: 'quick',     label: 'Enviar',   icon: '📤' },
+    { id: 'schedule',  label: 'Programar', icon: '⏰' },
+    { id: 'scheduled', label: 'Agenda',    icon: '📋' },
   ]
 
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
       <header className="bg-whatsapp-teal text-white safe-top sticky top-0 z-30 shadow-md">
-        <div className="px-4 py-4 flex items-center gap-3">
-          <div className="w-9 h-9 bg-whatsapp-green rounded-full flex items-center justify-center shadow-sm text-xl">
-            ⚡
+        <div className="px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-whatsapp-green rounded-full flex items-center justify-center shadow-sm text-xl">
+              ⚡
+            </div>
+            <div>
+              <h1 className="text-lg font-bold leading-tight">Quick Zap</h1>
+              <p className="text-xs text-green-200">WhatsApp sin guardar contactos</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-lg font-bold leading-tight">Quick Zap</h1>
-            <p className="text-xs text-green-200">WhatsApp sin guardar contactos</p>
-          </div>
+          <BellButton />
         </div>
 
         {/* Tabs */}
@@ -105,10 +103,6 @@ function AppContent() {
 
       {/* Main content */}
       <main className="flex-1 px-4 py-5 max-w-lg mx-auto w-full space-y-4">
-        {/* Push notification prompt */}
-        <PushNotifications />
-
-        {/* Tab content */}
         {activeTab === 'quick' && (
           <QuickSend
             initialPhone={initialPhone}
