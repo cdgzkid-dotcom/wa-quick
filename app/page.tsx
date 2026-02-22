@@ -63,7 +63,12 @@ function AppContent() {
     check()
     const t1 = setTimeout(check, 500)
     const t2 = setTimeout(check, 1000)
-    return () => { clearTimeout(t1); clearTimeout(t2) }
+    window.addEventListener('focus', check)
+    return () => {
+      clearTimeout(t1)
+      clearTimeout(t2)
+      window.removeEventListener('focus', check)
+    }
   }, [])
 
   // SW now uses openWindow(deepUrl) — deep link arrives via URL params, handled above.
