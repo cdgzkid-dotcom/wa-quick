@@ -46,35 +46,32 @@ function AppContent() {
     return () => clearInterval(cronInterval)
   }, [])
 
-  // Deep-link via SW global variable (works for iOS locked-screen + background resume).
-  // On focus/visibilitychange, ask the SW for any pending deep-link data.
-  // The SW responds with {type:'DEEPLINK', phone, countryCode, message}.
+  // Deep-link via server: on mount and whenever the app comes to foreground,
+  // fetch /api/deeplink which returns the most recent unused pending deep-link
+  // (saved by the cron when it sent the push notification).
+  // This works on iOS locked-screen + background resume where SW messaging is unreliable.
   useEffect(() => {
-    if (!('serviceWorker' in navigator)) return
-
-    const handler = (event: MessageEvent) => {
-      const { type, phone, countryCode, message } = event.data ?? {}
-      if ((type === 'DEEPLINK' || type === 'NOTIFICATION_TAP') && phone && countryCode) {
-        setActiveTab('quick')
-        setDeepLink({ phone, countryCode, message: message || '' })
-      }
+    const checkDeepLink = () => {
+      fetch('/api/deeplink')
+        .then((r) => r.json())
+        .then((data) => {
+          if (data && data.phone && data.countryCode) {
+            setActiveTab('quick')
+            setDeepLink({ phone: data.phone, countryCode: data.countryCode, message: data.message || '' })
+          }
+        })
+        .catch(() => {})
     }
 
-    const requestDeepLink = () => {
-      navigator.serviceWorker.controller?.postMessage('GET_DEEPLINK')
-    }
-
-    navigator.serviceWorker.addEventListener('message', handler)
-    // Ask on mount (handles cold-start: app opened from closed state)
-    requestDeepLink()
-    // Ask whenever app comes to foreground (iOS background resume)
-    window.addEventListener('focus', requestDeepLink)
-    document.addEventListener('visibilitychange', requestDeepLink)
+    // Check on mount (cold-start: app opened from closed state)
+    checkDeepLink()
+    // Check whenever app comes to foreground (iOS background resume)
+    window.addEventListener('focus', checkDeepLink)
+    document.addEventListener('visibilitychange', checkDeepLink)
 
     return () => {
-      navigator.serviceWorker.removeEventListener('message', handler)
-      window.removeEventListener('focus', requestDeepLink)
-      document.removeEventListener('visibilitychange', requestDeepLink)
+      window.removeEventListener('focus', checkDeepLink)
+      document.removeEventListener('visibilitychange', checkDeepLink)
     }
   }, [])
 

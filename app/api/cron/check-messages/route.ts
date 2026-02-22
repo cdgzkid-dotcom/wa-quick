@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { connectDB } from '@/app/lib/mongoose'
 import ScheduledMessage from '@/app/lib/models/ScheduledMessage'
 import PushSubscription from '@/app/lib/models/PushSubscription'
+import PendingDeepLink from '@/app/lib/models/PendingDeepLink'
 import { sendPushNotification } from '@/app/lib/webpush'
 
 export async function GET(request: NextRequest) {
@@ -76,7 +77,17 @@ export async function GET(request: NextRequest) {
 
       for (const sub of subscriptions) {
         const result = await sendPushNotification(sub, payload)
-        if (result.expired) expiredEndpoints.push(sub.endpoint)
+        if (result.expired) {
+          expiredEndpoints.push(sub.endpoint)
+        } else {
+          await PendingDeepLink.create({
+            phone,
+            countryCode: cc,
+            message: msg.message || '',
+            subscriptionEndpoint: sub.endpoint,
+            used: false,
+          })
+        }
       }
 
       await ScheduledMessage.findByIdAndUpdate(msg._id, { notified: true, sent: true })
