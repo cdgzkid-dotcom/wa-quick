@@ -6,7 +6,7 @@ export async function GET() {
   try {
     await connectDB()
 
-    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000)
+    const fiveMinutesAgo = new Date(Date.now() - 60 * 1000)
 
     const totalCount = await PendingDeepLink.countDocuments()
     const latest = await PendingDeepLink.findOne().sort({ createdAt: -1 }).lean()
@@ -29,7 +29,7 @@ export async function GET() {
       if (latest && latest.used) {
         console.log('[deeplink] no result: most recent doc is already used=true')
       } else if (latest && latest.createdAt < fiveMinutesAgo) {
-        console.log('[deeplink] no result: most recent doc is older than 5 minutes (createdAt=%s, cutoff=%s)',
+        console.log('[deeplink] no result: most recent doc is older than 60 seconds (createdAt=%s, cutoff=%s)',
           latest.createdAt, fiveMinutesAgo)
       } else {
         console.log('[deeplink] no result: no unused docs within 5 minutes')
