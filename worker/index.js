@@ -12,20 +12,17 @@ self.addEventListener('push', (event) => {
     badge: '/icons/icon-72x72.png',
     vibrate: [200, 100, 200],
     data: {
-      url: data.url || '/',
-      messageId: data.messageId,
-      phoneNumber: data.phoneNumber,
-      waUrl: data.waUrl,
+      url:         data.url || '/',
+      messageId:   data.messageId,
+      phoneNumber: data.phoneNumber,  // full number (countryCode+phone), for display
+      phone:       data.phone        || '',
+      countryCode: data.countryCode  || '52',
+      message:     data.message      || '',
+      waUrl:       data.waUrl,
     },
     actions: [
-      {
-        action: 'send',
-        title: '📤 Enviar ahora',
-      },
-      {
-        action: 'dismiss',
-        title: '❌ Descartar',
-      },
+      { action: 'send',    title: '📤 Enviar ahora' },
+      { action: 'dismiss', title: '❌ Descartar'    },
     ],
     requireInteraction: true,
     tag: `wa-message-${data.messageId || Date.now()}`,
@@ -40,30 +37,38 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close()
 
   const { action } = event
-  const { waUrl, url } = event.notification.data
+  const { waUrl, url, phone, countryCode, message } = event.notification.data
 
   if (action === 'send' && waUrl) {
-    // Open WhatsApp directly
+    // "Enviar ahora" button → open WhatsApp directly
     event.waitUntil(clients.openWindow(waUrl))
-  } else if (action === 'dismiss') {
-    // Already closed above — nothing more to do
-  } else {
-    // Default tap: open the app send screen with phone/message pre-filled
-    const targetUrl = url || '/'
-    event.waitUntil(
-      clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
-        const appClient = windowClients.find((c) =>
-          c.url.startsWith(self.registration.scope)
-        )
-        if (appClient) {
-          // navigate() updates the URL and triggers a full navigation in the client
-          if ('navigate' in appClient) {
-            return appClient.navigate(targetUrl).then((c) => c && c.focus())
-          }
-          return appClient.focus()
-        }
-        return clients.openWindow(targetUrl)
-      })
-    )
+    return
   }
+
+  if (action === 'dismiss') return
+
+  // Default body tap → show the send screen with data pre-filled
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+      const appClient = windowClients.find((c) =>
+        c.url.startsWith(self.registration.scope)
+      )
+
+      if (appClient) {
+        // App is already open (common on iOS PWA in background).
+        // postMessage is the only reliable way to pass data on iOS —
+        // navigate() / openWindow() with URL params don't work consistently.
+        appClient.postMessage({
+          type:        'NOTIFICATION_TAP',
+          phone:       phone,
+          countryCode: countryCode,
+          message:     message,
+        })
+        return appClient.focus()
+      }
+
+      // App is closed → open it with URL params (works on fresh launch)
+      return clients.openWindow(url || '/')
+    })
+  )
 })

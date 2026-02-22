@@ -9,35 +9,56 @@ import BellButton from './components/BellButton'
 
 type Tab = 'quick' | 'schedule' | 'scheduled'
 
+type DeepLink = { phone: string; message: string; countryCode: string }
+
 function AppContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
 
-  // Pre-fill values from push notification deep link
+  // Initial values from URL params (app launched from notification while closed)
   const initialPhone       = searchParams.get('phone')       || ''
   const initialMessage     = searchParams.get('message')     || ''
   const initialCountryCode = searchParams.get('countryCode') || '52'
+  const tabFromUrl         = (searchParams.get('tab') as Tab) || 'quick'
 
-  // If phone param present, always land on "quick" tab
-  const tabFromUrl = (searchParams.get('tab') as Tab) || 'quick'
-  const initialTab: Tab = initialPhone ? 'quick' : tabFromUrl
-
-  const [activeTab, setActiveTab] = useState<Tab>(initialTab)
+  const [activeTab, setActiveTab]   = useState<Tab>(initialPhone ? 'quick' : tabFromUrl)
   const [refreshKey, setRefreshKey] = useState(0)
   const [showSuccess, setShowSuccess] = useState(false)
 
+  // Deep-link state — starts from URL params, updated via postMessage from SW
+  const [deepLink, setDeepLink] = useState<DeepLink>({
+    phone:       initialPhone,
+    message:     initialMessage,
+    countryCode: initialCountryCode,
+  })
+
   useEffect(() => {
-    // Register the custom service worker
+    // Register service worker
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw-custom.js').catch(console.error)
     }
 
-    // Check cron every minute (client-side fallback)
+    // Client-side cron fallback (every minute)
     const cronInterval = setInterval(() => {
       fetch('/api/cron/check-messages').catch(() => {})
     }, 60000)
 
     return () => clearInterval(cronInterval)
+  }, [])
+
+  // Listen for postMessage from the service worker (iOS deep-link fix)
+  useEffect(() => {
+    if (!('serviceWorker' in navigator)) return
+
+    const handler = (event: MessageEvent) => {
+      if (event.data?.type !== 'NOTIFICATION_TAP') return
+      const { phone, countryCode, message } = event.data as DeepLink & { type: string }
+      setDeepLink({ phone, countryCode, message })
+      setActiveTab('quick')
+    }
+
+    navigator.serviceWorker.addEventListener('message', handler)
+    return () => navigator.serviceWorker.removeEventListener('message', handler)
   }, [])
 
   const handleTabChange = (tab: Tab) => {
@@ -53,7 +74,7 @@ function AppContent() {
   }
 
   const tabs: { id: Tab; label: string; icon: string }[] = [
-    { id: 'quick',     label: 'Enviar',   icon: '📤' },
+    { id: 'quick',     label: 'Enviar',    icon: '📤' },
     { id: 'schedule',  label: 'Programar', icon: '⏰' },
     { id: 'scheduled', label: 'Agenda',    icon: '📋' },
   ]
@@ -105,12 +126,12 @@ function AppContent() {
       <main className="flex-1 px-4 py-5 max-w-lg mx-auto w-full space-y-4">
         {activeTab === 'quick' && (
           <QuickSend
-            initialPhone={initialPhone}
-            initialMessage={initialMessage}
-            initialCountryCode={initialCountryCode}
+            initialPhone={deepLink.phone}
+            initialMessage={deepLink.message}
+            initialCountryCode={deepLink.countryCode}
           />
         )}
-        {activeTab === 'schedule' && <ScheduleMessage onScheduled={handleScheduled} />}
+        {activeTab === 'schedule'  && <ScheduleMessage onScheduled={handleScheduled} />}
         {activeTab === 'scheduled' && <ScheduledList refreshKey={refreshKey} />}
       </main>
 
