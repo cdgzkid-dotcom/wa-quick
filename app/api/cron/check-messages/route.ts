@@ -47,12 +47,17 @@ export async function GET(request: NextRequest) {
       const fullPhone = `${msg.countryCode}${msg.phoneNumber}`
       const waUrl = `https://wa.me/${fullPhone}${msg.message ? `?text=${encodeURIComponent(msg.message)}` : ''}`
 
+      const sendUrl = `/?tab=quick&phone=${encodeURIComponent(msg.phoneNumber)}&countryCode=${encodeURIComponent(msg.countryCode)}${msg.message ? `&message=${encodeURIComponent(msg.message)}` : ''}`
+
       const payload = {
-        title: '📱 WA Quick - Mensaje Programado',
+        title: '⚡ Quick Zap - Mensaje Programado',
         body: `Recordatorio: enviar mensaje a +${fullPhone}${msg.message ? `\n"${msg.message.substring(0, 50)}${msg.message.length > 50 ? '...' : ''}"` : ''}`,
-        url: '/?tab=scheduled',
+        url: sendUrl,
         messageId: msg._id.toString(),
         phoneNumber: fullPhone,
+        phone: msg.phoneNumber,
+        countryCode: msg.countryCode,
+        message: msg.message || '',
         waUrl,
       }
 

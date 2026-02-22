@@ -17,7 +17,16 @@ type Tab = 'quick' | 'schedule' | 'scheduled'
 function AppContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const initialTab = (searchParams.get('tab') as Tab) || 'quick'
+
+  // Pre-fill values from push notification deep link
+  const initialPhone       = searchParams.get('phone')       || ''
+  const initialMessage     = searchParams.get('message')     || ''
+  const initialCountryCode = searchParams.get('countryCode') || '52'
+
+  // If phone param present, always land on "quick" tab
+  const tabFromUrl = (searchParams.get('tab') as Tab) || 'quick'
+  const initialTab: Tab = initialPhone ? 'quick' : tabFromUrl
+
   const [activeTab, setActiveTab] = useState<Tab>(initialTab)
   const [refreshKey, setRefreshKey] = useState(0)
   const [showSuccess, setShowSuccess] = useState(false)
@@ -59,14 +68,11 @@ function AppContent() {
       {/* Header */}
       <header className="bg-whatsapp-teal text-white safe-top sticky top-0 z-30 shadow-md">
         <div className="px-4 py-4 flex items-center gap-3">
-          <div className="w-9 h-9 bg-whatsapp-green rounded-full flex items-center justify-center shadow-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
-              <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 16.938c-.26.733-.948 1.345-1.687 1.572-.548.17-1.256.207-2.022.042-.468-.101-1.054-.294-1.8-.617-3.298-1.432-5.447-4.74-5.612-4.964-.163-.22-1.315-1.748-1.315-3.33 0-1.58.83-2.356 1.123-2.678.293-.322.64-.403.854-.403.214 0 .428.002.615.01.197.01.462-.075.723.552.273.656.924 2.259.998 2.421.074.162.124.352.025.567-.099.214-.149.348-.298.537l-.446.517c-.147.17-.3.354-.13.694.173.34.77 1.27 1.65 2.057 1.134 1.009 2.089 1.32 2.384 1.47.297.148.47.124.644-.075.174-.198.743-.87.942-1.168.197-.298.395-.248.666-.149.27.1 1.73.817 2.027.967.297.149.495.223.57.347.073.124.073.72-.187 1.453z"/>
-            </svg>
+          <div className="w-9 h-9 bg-whatsapp-green rounded-full flex items-center justify-center shadow-sm text-xl">
+            ⚡
           </div>
           <div>
-            <h1 className="text-lg font-bold leading-tight">WA Quick</h1>
+            <h1 className="text-lg font-bold leading-tight">Quick Zap</h1>
             <p className="text-xs text-green-200">WhatsApp sin guardar contactos</p>
           </div>
         </div>
@@ -103,7 +109,13 @@ function AppContent() {
         <PushNotifications />
 
         {/* Tab content */}
-        {activeTab === 'quick' && <QuickSend />}
+        {activeTab === 'quick' && (
+          <QuickSend
+            initialPhone={initialPhone}
+            initialMessage={initialMessage}
+            initialCountryCode={initialCountryCode}
+          />
+        )}
         {activeTab === 'schedule' && <ScheduleMessage onScheduled={handleScheduled} />}
         {activeTab === 'scheduled' && <ScheduledList refreshKey={refreshKey} />}
       </main>

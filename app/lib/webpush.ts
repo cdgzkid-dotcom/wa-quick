@@ -20,6 +20,9 @@ export async function sendPushNotification(
     url?: string
     messageId?: string
     phoneNumber?: string
+    phone?: string
+    countryCode?: string
+    message?: string
     waUrl?: string
   }
 ) {

@@ -52,10 +52,16 @@ type Contact = {
   countryCode: string
 }
 
-export default function QuickSend() {
-  const [countryCode, setCountryCode] = useState('52')
-  const [phoneNumber, setPhoneNumber] = useState('')
-  const [message, setMessage] = useState('')
+type Props = {
+  initialPhone?: string
+  initialMessage?: string
+  initialCountryCode?: string
+}
+
+export default function QuickSend({ initialPhone = '', initialMessage = '', initialCountryCode = '52' }: Props) {
+  const [countryCode, setCountryCode] = useState(initialCountryCode)
+  const [phoneNumber, setPhoneNumber] = useState(initialPhone)
+  const [message, setMessage] = useState(initialMessage)
   const [recentContacts, setRecentContacts] = useState<Contact[]>([])
   const [showCountryPicker, setShowCountryPicker] = useState(false)
   const [hasContactPicker, setHasContactPicker] = useState(false)
@@ -255,7 +261,7 @@ export default function QuickSend() {
         disabled={!phoneNumber.trim()}
         className="btn-primary w-full text-lg"
       >
-        📤 Ship it now!!
+        🚀 Ship it now!!
       </button>
 
       {/* ── Recent contacts ──────────────────────────────── */}

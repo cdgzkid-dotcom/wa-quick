@@ -32,7 +32,7 @@ self.addEventListener('push', (event) => {
   }
 
   event.waitUntil(
-    self.registration.showNotification(data.title || 'WA Quick', options)
+    self.registration.showNotification(data.title || 'Quick Zap', options)
   )
 })
 
@@ -43,16 +43,23 @@ self.addEventListener('notificationclick', (event) => {
   const { waUrl, url } = event.notification.data
 
   if (action === 'send' && waUrl) {
+    // Open WhatsApp directly
     event.waitUntil(clients.openWindow(waUrl))
-  } else if (action !== 'dismiss') {
+  } else if (action === 'dismiss') {
+    // Already closed above — nothing more to do
+  } else {
+    // Default tap: open the app send screen with phone/message pre-filled
+    const targetUrl = url || '/'
     event.waitUntil(
-      clients.matchAll({ type: 'window' }).then((clientList) => {
-        for (const client of clientList) {
-          if ('focus' in client) return client.focus()
+      clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+        const appClient = windowClients.find((c) =>
+          c.url.startsWith(self.registration.scope)
+        )
+        if (appClient) {
+          appClient.navigate(targetUrl)
+          return appClient.focus()
         }
-        if (clients.openWindow) {
-          return clients.openWindow(waUrl || url || '/')
-        }
+        return clients.openWindow(targetUrl)
       })
     )
   }
