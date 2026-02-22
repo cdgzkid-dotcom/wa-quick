@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import GoogleContacts from './GoogleContacts'
 
 const COUNTRY_CODES = [
   { code: '52', flag: '🇲🇽', name: 'México' },
@@ -203,6 +204,14 @@ export default function QuickSend() {
           />
         </div>
       </div>
+
+      {/* Google Contacts */}
+      <GoogleContacts
+        onSelect={(phone, cc) => {
+          setPhoneNumber(phone)
+          setCountryCode(cc)
+        }}
+      />
 
       {/* Send button */}
       <button
