@@ -223,7 +223,7 @@ export default function ScheduleMessage({ onScheduled }: Props) {
       </div>
 
       {/* Date/Time */}
-      <div className="card overflow-hidden">
+      <div className="card" style={{ overflow: 'hidden' }}>
         <label className="card-label">
           Fecha y hora del recordatorio
         </label>
@@ -231,8 +231,8 @@ export default function ScheduleMessage({ onScheduled }: Props) {
           type="datetime-local"
           value={scheduledAt}
           onChange={(e) => setScheduledAt(e.target.value)}
-          className="input-field w-full max-w-full min-w-0"
-          style={{ maxWidth: '100%' }}
+          className="input-field"
+          style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}
           required
         />
       </div>

@@ -5,7 +5,7 @@ const path  = require('path')
 const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
     <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur"/>
+      <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur"/>
       <feMerge>
         <feMergeNode in="blur"/>
         <feMergeNode in="SourceGraphic"/>
@@ -26,9 +26,12 @@ const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <rect x="11" y="11" width="490" height="490" rx="106"
     fill="none" stroke="#25D366" stroke-width="3" opacity="0.9"/>
 
-  <!-- Lightning bolt ⚡ centered at (258, 257) -->
-  <path d="M296 65 L154 284 H249 L192 450 L363 227 H264 Z"
-    fill="#25D366" filter="url(#glow)"/>
+  <!-- Lightning bolt: viewBox 0 0 100 100, scaled 3.6x, centered in 512x512 -->
+  <!-- path "M58 12L25 55H48L40 88L75 45H52L58 12Z" scaled and offset to (76,76) -->
+  <g transform="translate(76, 76) scale(3.6)">
+    <path d="M58 12L25 55H48L40 88L75 45H52L58 12Z"
+      fill="#25D366" filter="url(#glow)"/>
+  </g>
 </svg>`
 
 const sizes = [72, 96, 128, 144, 152, 192, 384, 512]
