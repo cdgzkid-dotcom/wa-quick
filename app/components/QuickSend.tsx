@@ -44,9 +44,9 @@ export default function QuickSend({
   initialMessage = '',
   initialCountryCode = '52',
 }: Props) {
-  const [countryCode, setCountryCode]       = useState(initialCountryCode)
-  const [phoneNumber, setPhoneNumber]       = useState(initialPhone)
-  const [message, setMessage]               = useState(initialMessage)
+  const [countryCode, setCountryCode]       = useState('')
+  const [phoneNumber, setPhoneNumber]       = useState('')
+  const [message, setMessage]               = useState('')
   const [recentContacts, setRecentContacts] = useState<Contact[]>([])
   const [showCountryPicker, setShowCountryPicker] = useState(false)
   const [hasContactPicker, setHasContactPicker]   = useState(false)
@@ -55,11 +55,12 @@ export default function QuickSend({
     setHasContactPicker('contacts' in navigator)
   }, [])
 
-  // Sync whenever deep-link props change (notification tap, URL params)
+  // Sync whenever deep-link props change (notification tap, URL params).
+  // When initialPhone is empty, resets the form to a clean state.
   useEffect(() => {
-    setPhoneNumber(initialPhone)
-    setMessage(initialMessage)
-    setCountryCode(initialCountryCode)
+    setPhoneNumber(initialPhone || '')
+    setMessage(initialMessage || '')
+    setCountryCode(initialCountryCode || '52')
   }, [initialPhone, initialMessage, initialCountryCode])
 
   const selectedCountry = COUNTRY_CODES.find((c) => c.code === countryCode)

@@ -52,9 +52,11 @@ function AppContent() {
   // This works on iOS locked-screen + background resume where SW messaging is unreliable.
   useEffect(() => {
     const checkDeepLink = () => {
+      console.log('[deeplink] fetching /api/deeplink')
       fetch('/api/deeplink')
         .then((r) => r.json())
         .then((data) => {
+          console.log('[deeplink] response:', data)
           if (data && data.phone && data.countryCode) {
             setActiveTab('quick')
             setDeepLink({ phone: data.phone, countryCode: data.countryCode, message: data.message || '' })
