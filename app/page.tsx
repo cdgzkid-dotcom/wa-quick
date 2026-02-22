@@ -46,7 +46,21 @@ function AppContent() {
     return () => clearInterval(cronInterval)
   }, [])
 
-  // Listen for postMessage from the service worker (iOS deep-link fix)
+  // On mount: read URL params and clean them (handles app opened fresh from notification)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const phone  = params.get('phone')
+    if (phone) {
+      const message     = params.get('message')     || ''
+      const countryCode = params.get('countryCode') || '52'
+      setDeepLink({ phone, message, countryCode })
+      setActiveTab('quick')
+      window.history.replaceState({}, '', '/?tab=quick')
+    }
+  }, [])
+
+  // Listen for postMessage from the service worker (NOTIFICATION_TAP)
+  // Also fires when SW responds to GET_PENDING_DEEP_LINK (iOS fallback)
   useEffect(() => {
     if (!('serviceWorker' in navigator)) return
 
@@ -59,6 +73,21 @@ function AppContent() {
 
     navigator.serviceWorker.addEventListener('message', handler)
     return () => navigator.serviceWorker.removeEventListener('message', handler)
+  }, [])
+
+  // When app comes to foreground, ask SW for any pending deep link (iOS fallback)
+  useEffect(() => {
+    if (!('serviceWorker' in navigator)) return
+
+    const onVisible = () => {
+      if (document.visibilityState !== 'visible') return
+      navigator.serviceWorker.ready
+        .then((reg) => reg.active?.postMessage({ type: 'GET_PENDING_DEEP_LINK' }))
+        .catch(() => {})
+    }
+
+    document.addEventListener('visibilitychange', onVisible)
+    return () => document.removeEventListener('visibilitychange', onVisible)
   }, [])
 
   const handleTabChange = (tab: Tab) => {

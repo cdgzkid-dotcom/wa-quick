@@ -1,6 +1,9 @@
 // Custom worker code merged into next-pwa service worker
 // This handles push notifications
 
+// SW-global pending deep link — page can request it via GET_PENDING_DEEP_LINK message
+let pendingDeepLink = null
+
 self.addEventListener('push', (event) => {
   if (!event.data) return
 
@@ -48,6 +51,9 @@ self.addEventListener('notificationclick', (event) => {
   if (action === 'dismiss') return
 
   // Default body tap → show the send screen with data pre-filled
+  const scope   = self.registration.scope.replace(/\/$/, '')
+  const deepUrl = `${scope}/?tab=quick&phone=${encodeURIComponent(phone)}&countryCode=${encodeURIComponent(countryCode)}&message=${encodeURIComponent(message)}`
+
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
       const appClient = windowClients.find((c) =>
@@ -55,20 +61,23 @@ self.addEventListener('notificationclick', (event) => {
       )
 
       if (appClient) {
-        // App is already open (common on iOS PWA in background).
-        // postMessage is the only reliable way to pass data on iOS —
-        // navigate() / openWindow() with URL params don't work consistently.
-        appClient.postMessage({
-          type:        'NOTIFICATION_TAP',
-          phone:       phone,
-          countryCode: countryCode,
-          message:     message,
-        })
+        // Store in SW global so the page can fetch it via GET_PENDING_DEEP_LINK
+        pendingDeepLink = { phone, countryCode, message }
+        // Try postMessage (may fail on iOS when app is in background)
+        appClient.postMessage({ type: 'NOTIFICATION_TAP', phone, countryCode, message })
         return appClient.focus()
       }
 
-      // App is closed → open it with URL params (works on fresh launch)
-      return clients.openWindow(url || '/')
+      // Fallback: app is closed → open with URL params
+      return clients.openWindow(deepUrl)
     })
   )
+})
+
+// Page can request the stored deep link (iOS fallback when postMessage didn't arrive)
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'GET_PENDING_DEEP_LINK' && pendingDeepLink) {
+    event.source.postMessage({ type: 'NOTIFICATION_TAP', ...pendingDeepLink })
+    pendingDeepLink = null
+  }
 })

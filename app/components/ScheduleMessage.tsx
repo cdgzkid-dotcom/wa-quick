@@ -35,8 +35,7 @@ export default function ScheduleMessage({ onScheduled }: Props) {
   const [countryCode, setCountryCode] = useState('52')
   const [phoneNumber, setPhoneNumber] = useState('')
   const [message, setMessage] = useState('')
-  const [scheduledDate, setScheduledDate] = useState('')
-  const [scheduledTime, setScheduledTime] = useState('')
+  const [scheduledAt, setScheduledAt] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [showCountryPicker, setShowCountryPicker] = useState(false)
@@ -88,7 +87,7 @@ export default function ScheduleMessage({ onScheduled }: Props) {
     e.preventDefault()
     setError('')
 
-    if (!phoneNumber.trim() || !scheduledDate || !scheduledTime) {
+    if (!phoneNumber.trim() || !scheduledAt) {
       setError('Por favor completa el número y la fecha/hora')
       return
     }
@@ -109,7 +108,7 @@ export default function ScheduleMessage({ onScheduled }: Props) {
           phoneNumber: cleanPhone,
           countryCode,
           message,
-          scheduledAt: new Date(`${scheduledDate}T${scheduledTime}`).toISOString(),
+          scheduledAt: new Date(scheduledAt).toISOString(),
         }),
       })
 
@@ -121,8 +120,7 @@ export default function ScheduleMessage({ onScheduled }: Props) {
       // Reset form
       setPhoneNumber('')
       setMessage('')
-      setScheduledDate('')
-      setScheduledTime('')
+      setScheduledAt('')
       onScheduled()
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Error desconocido')
@@ -224,26 +222,18 @@ export default function ScheduleMessage({ onScheduled }: Props) {
         />
       </div>
 
-      {/* Date/Time — split into two inputs to avoid iOS Safari overflow */}
+      {/* Date/Time */}
       <div className="card" style={{ overflow: 'hidden' }}>
         <label className="card-label">
           Fecha y hora del recordatorio
         </label>
-        <div style={{ display: 'flex', gap: '8px', overflow: 'hidden' }}>
+        <div style={{ display: 'block', width: '100%', overflow: 'hidden' }}>
           <input
-            type="date"
-            value={scheduledDate}
-            onChange={(e) => setScheduledDate(e.target.value)}
+            type="datetime-local"
+            value={scheduledAt}
+            onChange={(e) => setScheduledAt(e.target.value)}
             className="input-field"
-            style={{ flex: 1, minWidth: 0, boxSizing: 'border-box' }}
-            required
-          />
-          <input
-            type="time"
-            value={scheduledTime}
-            onChange={(e) => setScheduledTime(e.target.value)}
-            className="input-field"
-            style={{ flex: 1, minWidth: 0, boxSizing: 'border-box' }}
+            style={{ display: 'block', width: '100%', maxWidth: '100%', minWidth: '0', boxSizing: 'border-box' }}
             required
           />
         </div>
@@ -257,7 +247,7 @@ export default function ScheduleMessage({ onScheduled }: Props) {
 
       <button
         type="submit"
-        disabled={loading || !phoneNumber.trim() || !scheduledDate || !scheduledTime}
+        disabled={loading || !phoneNumber.trim() || !scheduledAt}
         className="btn-primary w-full text-lg"
       >
         {loading ? (
