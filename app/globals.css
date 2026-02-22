@@ -43,7 +43,7 @@
   --shadow:       none;
 
   /* Logo */
-  --logo-bg:      #181818;
+  --logo-bg:      #0a0a0a;
   --logo-border:  #25D366;
   --logo-shadow:  0 0 10px rgba(37,211,102,0.25);
 
@@ -69,7 +69,7 @@
     --border-input: rgba(37,211,102,0.20);
     --hover:        rgba(255,255,255,0.04);
     --shadow:       none;
-    --logo-bg:      #181818;
+    --logo-bg:      #0a0a0a;
     --logo-border:  #25D366;
     --logo-shadow:  0 0 10px rgba(37,211,102,0.25);
     --phone-color:  #25D366;

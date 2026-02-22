@@ -98,7 +98,7 @@ function AppContent() {
       >
         <div className="px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div style={{ background: '#0a0a0a', border: '1.5px solid #25D366', borderRadius: '11px', width: '38px', height: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 10px rgba(37,211,102,0.25)' }}>
+            <div style={{ background: 'var(--logo-bg)', border: '1.5px solid var(--logo-border)', borderRadius: '11px', width: '38px', height: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--logo-shadow)' }}>
               <svg width="20" height="20" viewBox="0 0 100 100" fill="none">
                 <path d="M58 12L25 55H48L40 88L75 45H52L58 12Z" fill="#25D366"/>
               </svg>
