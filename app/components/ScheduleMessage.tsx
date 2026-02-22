@@ -133,7 +133,7 @@ export default function ScheduleMessage({ onScheduled }: Props) {
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Phone input */}
       <div className="card">
-        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
+        <label className="card-label">
           Número de WhatsApp
         </label>
 
@@ -150,7 +150,8 @@ export default function ScheduleMessage({ onScheduled }: Props) {
             </button>
 
             {showCountryPicker && (
-              <div className="absolute top-full left-0 mt-1 bg-white rounded-xl shadow-xl border border-gray-100 z-50 max-h-64 overflow-y-auto w-64">
+              <div className="absolute top-full left-0 mt-1 rounded-xl shadow-xl border z-50 max-h-64 overflow-y-auto w-64"
+                style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
                 {COUNTRY_CODES.map((c) => (
                   <button
                     key={c.code}
@@ -165,7 +166,7 @@ export default function ScheduleMessage({ onScheduled }: Props) {
                   >
                     <span className="text-xl">{c.flag}</span>
                     <span className="text-sm font-medium">{c.name}</span>
-                    <span className="text-gray-400 text-sm ml-auto">+{c.code}</span>
+                    <span className="text-sm ml-auto" style={{ color: 'var(--text-dim)' }}>+{c.code}</span>
                   </button>
                 ))}
               </div>
@@ -209,7 +210,7 @@ export default function ScheduleMessage({ onScheduled }: Props) {
 
       {/* Message */}
       <div className="card">
-        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
+        <label className="card-label">
           Mensaje (opcional)
         </label>
         <textarea
@@ -223,14 +224,15 @@ export default function ScheduleMessage({ onScheduled }: Props) {
 
       {/* Date/Time */}
       <div className="card overflow-hidden">
-        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
+        <label className="card-label">
           Fecha y hora del recordatorio
         </label>
         <input
           type="datetime-local"
           value={scheduledAt}
           onChange={(e) => setScheduledAt(e.target.value)}
-          className="input-field w-full min-w-0"
+          className="input-field w-full max-w-full min-w-0"
+          style={{ maxWidth: '100%' }}
           required
         />
       </div>

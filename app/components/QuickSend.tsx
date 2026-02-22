@@ -136,8 +136,8 @@ export default function QuickSend({
             </button>
 
             {showCountryPicker && (
-              <div className="absolute top-full left-0 mt-1 rounded-xl shadow-xl border border-gray-100 z-50 max-h-64 overflow-y-auto w-64"
-                style={{ background: 'var(--card)' }}>
+              <div className="absolute top-full left-0 mt-1 rounded-xl shadow-xl z-50 max-h-64 overflow-y-auto w-64"
+                style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
                 {COUNTRY_CODES.map((c) => (
                   <button
                     key={c.code}
@@ -214,10 +214,7 @@ export default function QuickSend({
       {/* ── Recent contacts ── */}
       {recentContacts.length > 0 && (
         <div className="card">
-          <p className="text-xs font-semibold uppercase tracking-wide mb-3"
-            style={{ color: 'var(--text-muted)' }}>
-            Recientes
-          </p>
+          <p className="card-label">Recientes</p>
           <div className="space-y-1">
             {recentContacts.map((contact, i) => (
               <button

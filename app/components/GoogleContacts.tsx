@@ -172,17 +172,18 @@ export default function GoogleContacts({ onSelect }: Props) {
         className="w-full flex items-center justify-between"
       >
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-full bg-white border border-gray-200 flex items-center justify-center shadow-sm flex-shrink-0">
+          <div className="w-7 h-7 rounded-full flex items-center justify-center shadow-sm flex-shrink-0"
+            style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
             <GoogleIcon className="w-4 h-4" />
           </div>
-          <span className="text-sm font-medium text-gray-700">Contactos de Google</span>
+          <span className="text-sm font-medium" style={{ color: 'var(--text)' }}>Contactos de Google</span>
           {accounts.length > 0 && (
             <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full font-medium">
               {accounts.length} cuenta{accounts.length !== 1 ? 's' : ''}
             </span>
           )}
         </div>
-        <span className="text-gray-400 text-xs">{expanded ? '▲' : '▼'}</span>
+        <span className="text-xs" style={{ color: 'var(--text-dim)' }}>{expanded ? '▲' : '▼'}</span>
       </button>
 
       {expanded && (
@@ -190,13 +191,14 @@ export default function GoogleContacts({ onSelect }: Props) {
           {/* Connected accounts */}
           {accounts.length > 0 && (
             <div className="space-y-1.5">
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+              <p className="card-label">
                 Cuentas conectadas
               </p>
               {accounts.map((account) => (
                 <div
                   key={account.id}
-                  className="flex items-center gap-2 bg-gray-50 rounded-xl px-3 py-2"
+                  className="flex items-center gap-2 rounded-xl px-3 py-2"
+                  style={{ background: 'var(--hover)' }}
                 >
                   {account.picture ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -228,7 +230,8 @@ export default function GoogleContacts({ onSelect }: Props) {
           {/* Connect button */}
           <a
             href="/api/auth/google/init"
-            className="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 shadow-sm active:bg-gray-50 transition-colors"
+            className="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl text-sm font-medium shadow-sm active:opacity-70 transition-opacity"
+            style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}
           >
             <GoogleIcon className="w-4 h-4 flex-shrink-0" />
             {accounts.length === 0 ? 'Conectar cuenta de Google' : 'Conectar otra cuenta'}

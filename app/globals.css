@@ -211,10 +211,18 @@
 /* Hover rows */
 .theme-dark .hover\:bg-gray-50:hover { background-color: var(--hover) !important; }
 
+/* Yellow badges (pending status in ScheduledList) */
+.theme-dark .bg-yellow-100   { background-color: rgba(234,179,8,0.15) !important; }
+.theme-dark .text-yellow-700 { color: #fbbf24 !important; }
+
 /* Input focus glow in dark */
 .theme-dark .input-field:focus {
   box-shadow: 0 0 0 3px rgba(37,211,102,0.20) !important;
 }
+
+/* btn-ship explicit text color per theme (bulletproof override) */
+.theme-light .btn-ship { color: #ffffff !important; }
+.theme-dark  .btn-ship { color: #000000 !important; }
 
 /* ── Utilities ──────────────────────────────────────────────── */
 html { scroll-behavior: smooth; }

@@ -82,38 +82,41 @@ function AppContent() {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <header className="bg-whatsapp-teal text-white safe-top sticky top-0 z-30 shadow-md">
+      <header
+        className="safe-top sticky top-0 z-30"
+        style={{ background: 'var(--bg)', borderBottom: '1px solid var(--border)' }}
+      >
         <div className="px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div
               className="w-9 h-9 rounded-xl flex items-center justify-center text-xl"
               style={{
-                background:  'var(--logo-bg)',
-                border:      '1.5px solid var(--logo-border)',
-                boxShadow:   'var(--logo-shadow)',
+                background: 'var(--logo-bg)',
+                border:     '1.5px solid var(--logo-border)',
+                boxShadow:  'var(--logo-shadow)',
               }}
             >
               ⚡
             </div>
             <div>
-              <h1 className="text-lg font-bold leading-tight font-space">Quick Zap</h1>
-              <p className="text-xs text-green-200">WhatsApp sin guardar contactos</p>
+              <h1 className="text-lg font-bold leading-tight font-space" style={{ color: 'var(--text)' }}>Quick Zap</h1>
+              <p className="text-xs" style={{ color: 'var(--text-dim)' }}>WhatsApp sin guardar contactos</p>
             </div>
           </div>
           <BellButton />
         </div>
 
         {/* Tabs */}
-        <div className="flex border-t border-whatsapp-dark">
+        <div className="flex" style={{ borderTop: '1px solid var(--border)' }}>
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => handleTabChange(tab.id)}
-              className={`flex-1 py-3 text-sm font-medium transition-colors flex flex-col items-center gap-0.5 ${
-                activeTab === tab.id
-                  ? 'text-white border-b-2 border-whatsapp-green'
-                  : 'text-green-200 border-b-2 border-transparent'
-              }`}
+              className="flex-1 py-3 text-sm font-medium transition-colors flex flex-col items-center gap-0.5"
+              style={{
+                color:        activeTab === tab.id ? '#25D366' : 'var(--text-dim)',
+                borderBottom: activeTab === tab.id ? '2px solid #25D366' : '2px solid transparent',
+              }}
             >
               <span>{tab.icon}</span>
               <span>{tab.label}</span>
@@ -124,7 +127,8 @@ function AppContent() {
 
       {/* Success toast */}
       {showSuccess && (
-        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-50 bg-whatsapp-dark text-white px-5 py-3 rounded-full shadow-lg text-sm font-medium flex items-center gap-2 animate-fade-in">
+        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-full shadow-lg text-sm font-medium flex items-center gap-2"
+          style={{ background: '#25D366', color: '#fff' }}>
           ✅ ¡Recordatorio programado!
         </div>
       )}

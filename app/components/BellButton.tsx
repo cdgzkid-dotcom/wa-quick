@@ -92,11 +92,14 @@ export default function BellButton() {
       onClick={handleToggle}
       disabled={loading}
       title={title}
-      className="relative flex items-center justify-center w-9 h-9 rounded-full active:bg-whatsapp-dark transition-colors"
+      className="relative flex items-center justify-center w-9 h-9 rounded-full active:opacity-70 transition-opacity"
     >
       <span className="text-xl leading-none">{loading ? '⏳' : '🔔'}</span>
       {/* Status dot */}
-      <span className={`absolute bottom-0.5 right-0.5 w-2.5 h-2.5 rounded-full border-2 border-whatsapp-teal ${dotColor}`} />
+      <span
+        className={`absolute bottom-0.5 right-0.5 w-2.5 h-2.5 rounded-full border-2 ${dotColor}`}
+        style={{ borderColor: 'var(--bg)' }}
+      />
     </button>
   )
 }
