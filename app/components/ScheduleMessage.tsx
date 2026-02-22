@@ -222,7 +222,7 @@ export default function ScheduleMessage({ onScheduled }: Props) {
       </div>
 
       {/* Date/Time */}
-      <div className="card">
+      <div className="card overflow-hidden">
         <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
           Fecha y hora del recordatorio
         </label>
@@ -230,7 +230,7 @@ export default function ScheduleMessage({ onScheduled }: Props) {
           type="datetime-local"
           value={scheduledAt}
           onChange={(e) => setScheduledAt(e.target.value)}
-          className="input-field w-full"
+          className="input-field w-full min-w-0"
           required
         />
       </div>
