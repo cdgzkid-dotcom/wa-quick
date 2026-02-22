@@ -229,13 +229,13 @@ export default function ScheduleMessage({ onScheduled }: Props) {
         <label className="card-label">
           Fecha y hora del recordatorio
         </label>
-        <div style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <div style={{ display: 'flex', gap: '8px', overflow: 'hidden' }}>
           <input
             type="date"
             value={scheduledDate}
             onChange={(e) => setScheduledDate(e.target.value)}
             className="input-field"
-            style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}
+            style={{ flex: 1, minWidth: 0, boxSizing: 'border-box' }}
             required
           />
           <input
@@ -243,7 +243,7 @@ export default function ScheduleMessage({ onScheduled }: Props) {
             value={scheduledTime}
             onChange={(e) => setScheduledTime(e.target.value)}
             className="input-field"
-            style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}
+            style={{ flex: 1, minWidth: 0, boxSizing: 'border-box' }}
             required
           />
         </div>
