@@ -2,12 +2,68 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Theme variables ──────────────────────────────────────── */
+
+.theme-light {
+  --bg:           #f5f5f5;
+  --card:         #ffffff;
+  --input-bg:     #f5f5f5;
+  --text:         #111111;
+  --text-dim:     #aaaaaa;
+  --text-muted:   #6b7280;
+  --accent:       #25D366;
+  --accent-glow:  transparent;
+  --border:       rgba(0,0,0,0.06);
+  --border-input: rgba(0,0,0,0.10);
+  --hover:        rgba(0,0,0,0.04);
+  --shadow:       0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+}
+
+.theme-dark {
+  --bg:           #0a0a0a;
+  --card:         #111111;
+  --input-bg:     #181818;
+  --text:         #e8e8e8;
+  --text-dim:     #555555;
+  --text-muted:   #888888;
+  --accent:       #25D366;
+  --accent-glow:  rgba(37,211,102,0.25);
+  --border:       rgba(37,211,102,0.18);
+  --border-input: rgba(255,255,255,0.08);
+  --hover:        rgba(255,255,255,0.04);
+  --shadow:       0 1px 3px rgba(0,0,0,0.6), 0 0 0 1px rgba(37,211,102,0.12);
+}
+
+/* prefers-color-scheme fallback (before JS applies theme class) */
+@media (prefers-color-scheme: dark) {
+  html:not(.theme-light):not(.theme-dark) {
+    --bg:           #0a0a0a;
+    --card:         #111111;
+    --input-bg:     #181818;
+    --text:         #e8e8e8;
+    --text-dim:     #555555;
+    --text-muted:   #888888;
+    --accent:       #25D366;
+    --accent-glow:  rgba(37,211,102,0.25);
+    --border:       rgba(37,211,102,0.18);
+    --border-input: rgba(255,255,255,0.08);
+    --hover:        rgba(255,255,255,0.04);
+    --shadow:       0 1px 3px rgba(0,0,0,0.6), 0 0 0 1px rgba(37,211,102,0.12);
+  }
+}
+
+/* ── Base ─────────────────────────────────────────────────── */
+
 @layer base {
   body {
-    @apply bg-whatsapp-bg min-h-screen;
+    background-color: var(--bg, #f5f5f5);
+    color: var(--text, #111);
+    font-family: var(--font-dm-sans, sans-serif);
     -webkit-tap-highlight-color: transparent;
   }
 }
+
+/* ── Component classes ────────────────────────────────────── */
 
 @layer components {
   .btn-primary {
@@ -18,8 +74,8 @@
   }
 
   .btn-secondary {
-    @apply bg-white text-whatsapp-teal font-semibold py-3 px-6 rounded-full
-           border-2 border-whatsapp-green active:bg-whatsapp-light
+    @apply bg-transparent text-whatsapp-teal font-semibold py-3 px-6 rounded-full
+           border-2 border-whatsapp-green active:opacity-70
            transition-colors duration-150
            disabled:opacity-50 disabled:cursor-not-allowed
            flex items-center justify-center gap-2;
@@ -31,39 +87,74 @@
            flex items-center justify-center gap-2;
   }
 
-  .input-field {
-    @apply w-full px-4 py-3 rounded-xl border border-gray-200 bg-white
-           focus:outline-none focus:ring-2 focus:ring-whatsapp-green focus:border-transparent
-           text-gray-800 placeholder-gray-400 text-base;
-  }
-
   .card {
-    @apply bg-white rounded-2xl shadow-sm p-4 border border-gray-100;
+    background:    var(--card, #fff);
+    border:        1px solid var(--border, rgba(0,0,0,0.06));
+    box-shadow:    var(--shadow, 0 1px 3px rgba(0,0,0,0.08));
+    @apply rounded-2xl p-4;
   }
 
-  .tab-btn {
-    @apply flex-1 py-3 text-sm font-medium transition-colors duration-150;
+  .input-field {
+    background:    var(--input-bg, #fff);
+    color:         var(--text, #111);
+    border:        1px solid var(--border-input, rgba(0,0,0,0.10));
+    font-family:   inherit;
+    @apply w-full px-4 py-3 rounded-xl
+           focus:outline-none focus:ring-2 focus:ring-whatsapp-green focus:border-transparent
+           text-base;
   }
 
-  .tab-active {
-    @apply text-whatsapp-teal border-b-2 border-whatsapp-green;
+  .input-field::placeholder {
+    color: var(--text-dim, #aaa);
   }
 
-  .tab-inactive {
-    @apply text-gray-500 border-b-2 border-transparent;
+  /* Space Mono helper — apply to phone inputs and title */
+  .font-space {
+    font-family: var(--font-space-mono, monospace);
   }
 }
 
-/* Smooth scrolling */
-html {
-  scroll-behavior: smooth;
+/* ── Dark mode overrides for Tailwind inline classes ──────── */
+
+/* Backgrounds */
+.theme-dark .bg-white            { background-color: var(--card)  !important; }
+.theme-dark .bg-gray-50          { background-color: var(--hover)  !important; }
+.theme-dark .bg-gray-100         { background-color: rgba(255,255,255,0.06) !important; }
+.theme-dark .bg-whatsapp-light   { background-color: rgba(37,211,102,0.12)  !important; }
+.theme-dark .bg-red-50           { background-color: rgba(220,38,38,0.12)   !important; }
+.theme-dark .bg-blue-50          { background-color: rgba(59,130,246,0.12)  !important; }
+
+/* Text */
+.theme-dark .text-gray-900,
+.theme-dark .text-gray-800       { color: var(--text)         !important; }
+.theme-dark .text-gray-700       { color: #d0d0d0             !important; }
+.theme-dark .text-gray-600       { color: #aaaaaa             !important; }
+.theme-dark .text-gray-500       { color: var(--text-muted)   !important; }
+.theme-dark .text-gray-400       { color: var(--text-dim)     !important; }
+.theme-dark .text-red-600        { color: #f87171             !important; }
+.theme-dark .text-blue-600       { color: #60a5fa             !important; }
+.theme-dark .placeholder-gray-400::placeholder { color: var(--text-dim) !important; }
+
+/* Borders */
+.theme-dark .border-gray-100,
+.theme-dark .border-gray-200     { border-color: var(--border) !important; }
+.theme-dark .border-red-100      { border-color: rgba(220,38,38,0.2) !important; }
+
+/* Shadows / dropdowns */
+.theme-dark .shadow-xl           { box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(37,211,102,0.12) !important; }
+.theme-dark .shadow-sm           { box-shadow: var(--shadow) !important; }
+
+/* Hover states */
+.theme-dark .hover\:bg-gray-50:hover { background-color: var(--hover) !important; }
+
+/* Focus glow in dark mode */
+.theme-dark .input-field:focus {
+  box-shadow: 0 0 0 3px var(--accent-glow) !important;
 }
 
-/* Safe area for PWA on iOS */
-.safe-top {
-  padding-top: env(safe-area-inset-top);
-}
+/* ── Smooth scrolling ─────────────────────────────────────── */
+html { scroll-behavior: smooth; }
 
-.safe-bottom {
-  padding-bottom: env(safe-area-inset-bottom);
-}
+/* ── PWA safe areas ──────────────────────────────────────── */
+.safe-top    { padding-top:    env(safe-area-inset-top); }
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }

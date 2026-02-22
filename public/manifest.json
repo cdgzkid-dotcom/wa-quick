@@ -1,10 +1,10 @@
 {
-  "name": "WA Quick - WhatsApp Rápido",
-  "short_name": "WA Quick",
+  "name": "Quick Zap",
+  "short_name": "Quick Zap",
   "description": "Envía mensajes de WhatsApp rápidamente sin guardar contactos",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#075E54",
+  "background_color": "#0a0a0a",
   "theme_color": "#25D366",
   "orientation": "portrait",
   "icons": [

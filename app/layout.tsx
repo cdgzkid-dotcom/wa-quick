@@ -1,24 +1,37 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter } from 'next/font/google'
+import { Space_Mono, DM_Sans } from 'next/font/google'
 import './globals.css'
 
-const inter = Inter({ subsets: ['latin'] })
+const spaceMono = Space_Mono({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-space-mono',
+  display: 'swap',
+})
+
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  variable: '--font-dm-sans',
+  display: 'swap',
+})
+
+// Inline theme-detection script — runs synchronously before paint to avoid FOUC.
+// Night = 8 pm (20h) – 6 am. Fallback: prefers-color-scheme (handled via CSS).
+const themeScript = `(function(){try{var h=new Date().getHours();document.documentElement.classList.add(h<6||h>=20?'theme-dark':'theme-light')}catch(e){}})()`
 
 export const metadata: Metadata = {
-  title: 'WA Quick - WhatsApp Rápido',
+  title: 'Quick Zap',
   description: 'Envía mensajes de WhatsApp sin guardar contactos y programa recordatorios',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
-    statusBarStyle: 'default',
-    title: 'WA Quick',
+    statusBarStyle: 'black-translucent',
+    title: 'Quick Zap',
   },
-  formatDetection: {
-    telephone: false,
-  },
+  formatDetection: { telephone: false },
   openGraph: {
     type: 'website',
-    title: 'WA Quick',
+    title: 'Quick Zap',
     description: 'Envía WhatsApp rápido sin guardar contactos',
   },
 }
@@ -31,21 +44,19 @@ export const viewport: Viewport = {
   userScalable: false,
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es">
+    <html lang="es" className={`${spaceMono.variable} ${dmSans.variable}`}>
       <head>
+        {/* Theme detection — must run before first paint */}
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <meta name="google-site-verification" content="y-4xO2de01waw1QxnP86oMOvcKK0cl_AsYGaUG6s3rs" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="mobile-web-app-capable" content="yes" />
       </head>
-      <body className={inter.className}>{children}</body>
+      <body>{children}</body>
     </html>
   )
 }
