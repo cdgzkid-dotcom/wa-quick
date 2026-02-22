@@ -233,7 +233,7 @@ export default function ScheduleMessage({ onScheduled }: Props) {
             value={scheduledAt}
             onChange={(e) => setScheduledAt(e.target.value)}
             className="input-field"
-            style={{ display: 'block', width: '100%', maxWidth: '100%', minWidth: '0', boxSizing: 'border-box' }}
+            style={{ display: 'block', width: '100%', maxWidth: '100%', minWidth: '0', boxSizing: 'border-box', paddingRight: '12px' }}
             required
           />
         </div>

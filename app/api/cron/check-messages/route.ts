@@ -44,10 +44,20 @@ export async function GET(request: NextRequest) {
     const expiredEndpoints: string[] = []
 
     for (const msg of pendingMessages) {
-      const fullPhone = `${msg.countryCode}${msg.phoneNumber}`
+      const cc = msg.countryCode
+
+      // Strip country code if it was stored inside phoneNumber (e.g. Google contact
+      // returned "521234567890" instead of "1234567890" with countryCode "52").
+      // Only strip when the remaining digits are at least 6 (avoids false positives).
+      let phone = msg.phoneNumber
+      if (phone.startsWith(cc) && phone.length > cc.length + 5) {
+        phone = phone.slice(cc.length)
+      }
+
+      const fullPhone = `${cc}${phone}`
       const waUrl = `https://wa.me/${fullPhone}${msg.message ? `?text=${encodeURIComponent(msg.message)}` : ''}`
 
-      const sendUrl = `/?tab=quick&phone=${encodeURIComponent(msg.phoneNumber)}&countryCode=${encodeURIComponent(msg.countryCode)}${msg.message ? `&message=${encodeURIComponent(msg.message)}` : ''}`
+      const sendUrl = `/?tab=quick&phone=${encodeURIComponent(phone)}&countryCode=${encodeURIComponent(cc)}${msg.message ? `&message=${encodeURIComponent(msg.message)}` : ''}`
 
       const payload = {
         title: '⚡ Quick Zap - Mensaje Programado',
@@ -55,8 +65,8 @@ export async function GET(request: NextRequest) {
         url: sendUrl,
         messageId: msg._id.toString(),
         phoneNumber: fullPhone,
-        phone: msg.phoneNumber,
-        countryCode: msg.countryCode,
+        phone,
+        countryCode: cc,
         message: msg.message || '',
         waUrl,
       }
