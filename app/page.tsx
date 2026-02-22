@@ -64,10 +64,12 @@ function AppContent() {
     const t1 = setTimeout(check, 500)
     const t2 = setTimeout(check, 1000)
     window.addEventListener('focus', check)
+    document.addEventListener('visibilitychange', check)
     return () => {
       clearTimeout(t1)
       clearTimeout(t2)
       window.removeEventListener('focus', check)
+      document.removeEventListener('visibilitychange', check)
     }
   }, [])
 
