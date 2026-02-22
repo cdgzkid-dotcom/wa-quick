@@ -39,6 +39,7 @@ export default function RootLayout({
   return (
     <html lang="es">
       <head>
+        <meta name="google-site-verification" content="y-4xO2de01waw1QxnP86oMOvcKK0cl_AsYGaUG6s3rs" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
