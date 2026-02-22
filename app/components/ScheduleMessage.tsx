@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const COUNTRY_CODES = [
   { code: '52', flag: '🇲🇽', name: 'México' },
@@ -29,14 +29,6 @@ type Props = {
   onScheduled: () => void
 }
 
-// Get datetime-local min value (current time + 1 min)
-function getMinDateTime() {
-  const now = new Date()
-  now.setMinutes(now.getMinutes() + 1)
-  now.setSeconds(0)
-  now.setMilliseconds(0)
-  return now.toISOString().slice(0, 16)
-}
 
 export default function ScheduleMessage({ onScheduled }: Props) {
   const [countryCode, setCountryCode] = useState('52')
@@ -46,6 +38,11 @@ export default function ScheduleMessage({ onScheduled }: Props) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [showCountryPicker, setShowCountryPicker] = useState(false)
+  const [hasContactPicker, setHasContactPicker] = useState(false)
+
+  useEffect(() => {
+    setHasContactPicker('contacts' in navigator)
+  }, [])
 
   const selectedCountry = COUNTRY_CODES.find((c) => c.code === countryCode)
 
@@ -183,29 +180,31 @@ export default function ScheduleMessage({ onScheduled }: Props) {
             )}
           </div>
 
-          <div className="flex-1 flex gap-2">
+          <div className="flex-1">
             <input
               type="tel"
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
               placeholder="1234567890"
-              className="input-field flex-1"
+              className="input-field w-full"
               inputMode="tel"
             />
-            {'contacts' in navigator && (
-              <button
-                type="button"
-                onClick={handleContactPicker}
-                className="input-field w-auto px-3 text-whatsapp-teal"
-                title="Seleccionar contacto"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-8 3c1.65 0 3 1.35 3 3s-1.35 3-3 3-3-1.35-3-3 1.35-3 3-3zm6 12H6v-1c0-2 4-3.1 6-3.1s6 1.1 6 3.1v1z"/>
-                </svg>
-              </button>
-            )}
           </div>
         </div>
+
+        {/* Contact picker button */}
+        {hasContactPicker && (
+          <button
+            type="button"
+            onClick={handleContactPicker}
+            className="mt-3 w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-whatsapp-green text-whatsapp-teal text-sm font-medium active:bg-whatsapp-light transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-8 3c1.65 0 3 1.35 3 3s-1.35 3-3 3-3-1.35-3-3 1.35-3 3-3zm6 12H6v-1c0-2 4-3.1 6-3.1s6 1.1 6 3.1v1z"/>
+            </svg>
+            Elegir contacto
+          </button>
+        )}
       </div>
 
       {/* Message */}
@@ -251,7 +250,7 @@ export default function ScheduleMessage({ onScheduled }: Props) {
           type="datetime-local"
           value={scheduledAt}
           onChange={(e) => setScheduledAt(e.target.value)}
-          min={getMinDateTime()}
+
           className="input-field"
           required
         />
