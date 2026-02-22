@@ -55,8 +55,8 @@ function AppContent() {
       const cc     = params.get('cc')
       const msg    = params.get('msg')
       if (phone && cc) {
-        setDeepLink({ phone, countryCode: cc, message: msg || '' })
         setActiveTab('quick')
+        setDeepLink({ phone, countryCode: cc, message: msg || '' })
         history.replaceState({}, '', '/')
       }
     }

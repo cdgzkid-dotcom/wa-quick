@@ -55,13 +55,11 @@ export default function QuickSend({
     setHasContactPicker('contacts' in navigator)
   }, [])
 
-  // Sync when arriving via deep link (notification tap via postMessage)
+  // Sync whenever deep-link props change (notification tap, URL params)
   useEffect(() => {
-    if (initialPhone) {
-      setPhoneNumber(initialPhone)
-      setMessage(initialMessage)
-      setCountryCode(initialCountryCode)
-    }
+    setPhoneNumber(initialPhone)
+    setMessage(initialMessage)
+    setCountryCode(initialCountryCode)
   }, [initialPhone, initialMessage, initialCountryCode])
 
   const selectedCountry = COUNTRY_CODES.find((c) => c.code === countryCode)
