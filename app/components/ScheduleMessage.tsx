@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import GoogleContacts from './GoogleContacts'
 
 const COUNTRY_CODES = [
   { code: '52', flag: '🇲🇽', name: 'México' },
@@ -28,11 +27,9 @@ const COUNTRY_CODES = [
 
 type Props = {
   onScheduled: () => void
-  sessionId?: string
 }
 
-
-export default function ScheduleMessage({ onScheduled, sessionId = '' }: Props) {
+export default function ScheduleMessage({ onScheduled }: Props) {
   const [countryCode, setCountryCode] = useState('52')
   const [phoneNumber, setPhoneNumber] = useState('')
   const [message, setMessage] = useState('')
@@ -208,15 +205,6 @@ export default function ScheduleMessage({ onScheduled, sessionId = '' }: Props) 
         )}
       </div>
 
-      {/* Google Contacts */}
-      <GoogleContacts
-        sessionId={sessionId}
-        onSelect={(phone, cc) => {
-          setPhoneNumber(phone)
-          setCountryCode(cc)
-        }}
-      />
-
       {/* Message */}
       <div className="card">
         <label className="card-label">
@@ -279,7 +267,7 @@ export default function ScheduleMessage({ onScheduled, sessionId = '' }: Props) 
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/>
             </svg>
-            Programar recordatorio
+            Programar mensaje
           </>
         )}
       </button>

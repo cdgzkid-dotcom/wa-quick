@@ -93,9 +93,9 @@ function AppContent() {
   }
 
   const tabs: { id: Tab; label: string; icon: string }[] = [
-    { id: 'quick',     label: 'Enviar',    icon: '📤' },
-    { id: 'schedule',  label: 'Programar', icon: '⏰' },
-    { id: 'scheduled', label: 'Agenda',    icon: '📋' },
+    { id: 'quick',     label: 'Enviar',            icon: '📤' },
+    { id: 'schedule',  label: 'Programar mensaje', icon: '⏰' },
+    { id: 'scheduled', label: 'Historial',         icon: '📋' },
   ]
 
   return (
@@ -154,10 +154,9 @@ function AppContent() {
             initialPhone={deepLink.phone}
             initialMessage={deepLink.message}
             initialCountryCode={deepLink.countryCode}
-            sessionId={sessionId}
           />
         )}
-        {activeTab === 'schedule'  && <ScheduleMessage onScheduled={handleScheduled} sessionId={sessionId} />}
+        {activeTab === 'schedule'  && <ScheduleMessage onScheduled={handleScheduled} />}
         {activeTab === 'scheduled' && <ScheduledList refreshKey={refreshKey} />}
       </main>
 
