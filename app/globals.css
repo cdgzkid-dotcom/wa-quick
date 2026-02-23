@@ -10,24 +10,24 @@
   --input-bg:     #f5f5f5;
   --text:         #111111;
   --text-dim:     #aaaaaa;
-  --accent:       #25D366;
+  --accent:       #0B2A62;
   --border:       rgba(0,0,0,0.06);
   --border-input: rgba(0,0,0,0.08);
   --hover:        rgba(0,0,0,0.04);
   --shadow:       0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
 
   /* Logo */
-  --logo-bg:      #f0fdf4;
-  --logo-border:  #25D366;
+  --logo-bg:      #EEF2FF;
+  --logo-border:  #0B2A62;
   --logo-shadow:  none;
 
   /* Phone number color */
-  --phone-color:  #075E54;
+  --phone-color:  #0B2A62;
   --phone-glow:   none;
 
   /* Ship it now button */
   --btn-text:     #ffffff;
-  --btn-shadow:   0 4px 16px rgba(37,211,102,0.30);
+  --btn-shadow:   0 4px 16px rgba(11,42,98,0.30);
 }
 
 .theme-dark {
@@ -36,24 +36,24 @@
   --input-bg:     #181818;
   --text:         #e8e8e8;
   --text-dim:     #444444;
-  --accent:       #25D366;
+  --accent:       #FFFFFF;
   --border:       rgba(255,255,255,0.05);
-  --border-input: rgba(37,211,102,0.20);
+  --border-input: rgba(255,255,255,0.10);
   --hover:        rgba(255,255,255,0.04);
   --shadow:       none;
 
   /* Logo */
   --logo-bg:      #0a0a0a;
-  --logo-border:  #25D366;
-  --logo-shadow:  0 0 10px rgba(37,211,102,0.25);
+  --logo-border:  #FFFFFF;
+  --logo-shadow:  0 0 10px rgba(255,255,255,0.15);
 
   /* Phone number color */
-  --phone-color:  #25D366;
-  --phone-glow:   0 0 12px rgba(37,211,102,0.50);
+  --phone-color:  #FFFFFF;
+  --phone-glow:   0 0 12px rgba(255,255,255,0.25);
 
   /* Ship it now button */
-  --btn-text:     #000000;
-  --btn-shadow:   0 0 24px rgba(37,211,102,0.30);
+  --btn-text:     #ffffff;
+  --btn-shadow:   0 0 24px rgba(11,42,98,0.60);
 }
 
 /* prefers-color-scheme fallback (before JS sets the class) */
@@ -64,18 +64,18 @@
     --input-bg:     #181818;
     --text:         #e8e8e8;
     --text-dim:     #444444;
-    --accent:       #25D366;
+    --accent:       #FFFFFF;
     --border:       rgba(255,255,255,0.05);
-    --border-input: rgba(37,211,102,0.20);
+    --border-input: rgba(255,255,255,0.10);
     --hover:        rgba(255,255,255,0.04);
     --shadow:       none;
     --logo-bg:      #0a0a0a;
-    --logo-border:  #25D366;
-    --logo-shadow:  0 0 10px rgba(37,211,102,0.25);
-    --phone-color:  #25D366;
-    --phone-glow:   0 0 12px rgba(37,211,102,0.50);
-    --btn-text:     #000000;
-    --btn-shadow:   0 0 24px rgba(37,211,102,0.30);
+    --logo-border:  #FFFFFF;
+    --logo-shadow:  0 0 10px rgba(255,255,255,0.15);
+    --phone-color:  #FFFFFF;
+    --phone-glow:   0 0 12px rgba(255,255,255,0.25);
+    --btn-text:     #ffffff;
+    --btn-shadow:   0 0 24px rgba(11,42,98,0.60);
   }
 }
 
@@ -137,7 +137,7 @@
   /* Ship it now button */
   .btn-ship {
     width:           100%;
-    background:      #25D366;
+    background:      #0B2A62;
     color:           var(--btn-text, #fff);
     font-family:     var(--font-space-mono, monospace);
     font-size:       1.125rem;
@@ -185,7 +185,7 @@
 .theme-dark .bg-white          { background-color: var(--card)  !important; }
 .theme-dark .bg-gray-50        { background-color: var(--hover) !important; }
 .theme-dark .bg-gray-100       { background-color: rgba(255,255,255,0.06) !important; }
-.theme-dark .bg-whatsapp-light { background-color: rgba(37,211,102,0.12) !important; }
+.theme-dark .bg-whatsapp-light { background-color: rgba(11,42,98,0.25) !important; }
 .theme-dark .bg-red-50         { background-color: rgba(220,38,38,0.12)  !important; }
 .theme-dark .bg-blue-50        { background-color: rgba(59,130,246,0.12) !important; }
 
@@ -217,12 +217,12 @@
 
 /* Input focus glow in dark */
 .theme-dark .input-field:focus {
-  box-shadow: 0 0 0 3px rgba(37,211,102,0.20) !important;
+  box-shadow: 0 0 0 3px rgba(11,42,98,0.40) !important;
 }
 
 /* btn-ship explicit text color per theme (bulletproof override) */
 .theme-light .btn-ship { color: #ffffff !important; }
-.theme-dark  .btn-ship { color: #000000 !important; }
+.theme-dark  .btn-ship { color: #ffffff !important; }
 
 /* ── Utilities ──────────────────────────────────────────────── */
 html { scroll-behavior: smooth; }

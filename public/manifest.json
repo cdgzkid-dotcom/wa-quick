@@ -1,11 +1,11 @@
 {
-  "name": "Quick Zap",
-  "short_name": "Quick Zap",
+  "name": "Sellia Connect",
+  "short_name": "Sellia",
   "description": "Envía mensajes de WhatsApp rápidamente sin guardar contactos",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0a0a",
-  "theme_color": "#25D366",
+  "theme_color": "#0B2A62",
   "orientation": "portrait",
   "icons": [
     {

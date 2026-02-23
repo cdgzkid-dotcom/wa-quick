@@ -20,24 +20,24 @@ const dmSans = DM_Sans({
 const themeScript = `(function(){try{var h=new Date().getHours();document.documentElement.classList.add(h<6||h>=20?'theme-dark':'theme-light')}catch(e){}})()`
 
 export const metadata: Metadata = {
-  title: 'Quick Zap',
+  title: 'Sellia Connect',
   description: 'Envía mensajes de WhatsApp sin guardar contactos y programa recordatorios',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'Quick Zap',
+    title: 'Sellia Connect',
   },
   formatDetection: { telephone: false },
   openGraph: {
     type: 'website',
-    title: 'Quick Zap',
+    title: 'Sellia Connect',
     description: 'Envía WhatsApp rápido sin guardar contactos',
   },
 }
 
 export const viewport: Viewport = {
-  themeColor: '#25D366',
+  themeColor: '#0B2A62',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,

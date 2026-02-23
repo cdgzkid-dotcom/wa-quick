@@ -107,13 +107,13 @@ function AppContent() {
       >
         <div className="px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div style={{ background: 'var(--logo-bg)', border: '1.5px solid var(--logo-border)', borderRadius: '11px', width: '38px', height: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--logo-shadow)' }}>
-              <svg width="20" height="20" viewBox="0 0 100 100" fill="none">
-                <path d="M58 12L25 55H48L40 88L75 45H52L58 12Z" fill="#25D366"/>
-              </svg>
-            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/assets/sellia-logo.png" alt="Sellia" width={38} height={38} style={{ borderRadius: '11px', objectFit: 'contain' }} />
             <div>
-              <h1 className="text-lg font-bold leading-tight font-space" style={{ color: 'var(--text)' }}>Quick Zap</h1>
+              <h1 className="text-lg font-bold leading-tight font-space">
+                <span style={{ color: 'var(--accent)' }}>sellia</span>{' '}
+                <span style={{ color: 'var(--text)' }}>Connect</span>
+              </h1>
               <p className="text-xs" style={{ color: 'var(--text-dim)' }}>WhatsApp sin guardar contactos</p>
             </div>
           </div>
@@ -128,8 +128,8 @@ function AppContent() {
               onClick={() => handleTabChange(tab.id)}
               className="flex-1 py-3 text-sm font-medium transition-colors flex flex-col items-center gap-0.5"
               style={{
-                color:        activeTab === tab.id ? '#25D366' : 'var(--text-dim)',
-                borderBottom: activeTab === tab.id ? '2px solid #25D366' : '2px solid transparent',
+                color:        activeTab === tab.id ? '#0B2A62' : 'var(--text-dim)',
+                borderBottom: activeTab === tab.id ? '2px solid #0B2A62' : '2px solid transparent',
               }}
             >
               <span>{tab.icon}</span>
@@ -142,7 +142,7 @@ function AppContent() {
       {/* Success toast */}
       {showSuccess && (
         <div className="fixed top-24 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-full shadow-lg text-sm font-medium flex items-center gap-2"
-          style={{ background: '#25D366', color: '#fff' }}>
+          style={{ background: '#0B2A62', color: '#fff' }}>
           ✅ ¡Recordatorio programado!
         </div>
       )}
