@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import GoogleContacts from './GoogleContacts'
 
 const COUNTRY_CODES = [
   { code: '52', flag: '🇲🇽', name: 'México' },
@@ -27,9 +28,10 @@ const COUNTRY_CODES = [
 
 type Props = {
   onScheduled: () => void
+  sessionId?: string
 }
 
-export default function ScheduleMessage({ onScheduled }: Props) {
+export default function ScheduleMessage({ onScheduled, sessionId = '' }: Props) {
   const [countryCode, setCountryCode] = useState('52')
   const [phoneNumber, setPhoneNumber] = useState('')
   const [message, setMessage] = useState('')
@@ -204,6 +206,15 @@ export default function ScheduleMessage({ onScheduled }: Props) {
           </button>
         )}
       </div>
+
+      {/* Google Contacts */}
+      <GoogleContacts
+        sessionId={sessionId}
+        onSelect={(phone, cc) => {
+          setPhoneNumber(phone)
+          setCountryCode(cc)
+        }}
+      />
 
       {/* Message */}
       <div className="card">

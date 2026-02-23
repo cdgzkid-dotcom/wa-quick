@@ -155,7 +155,7 @@ function AppContent() {
             initialCountryCode={deepLink.countryCode}
           />
         )}
-        {activeTab === 'schedule'  && <ScheduleMessage onScheduled={handleScheduled} />}
+        {activeTab === 'schedule'  && <ScheduleMessage onScheduled={handleScheduled} sessionId={sessionId} />}
         {activeTab === 'scheduled' && <ScheduledList refreshKey={refreshKey} />}
       </main>
 
