@@ -252,7 +252,7 @@ export default function ScheduleMessage({ onScheduled }: Props) {
       <button
         type="submit"
         disabled={loading || !phoneNumber.trim() || !scheduledAt}
-        className="btn-primary w-full text-lg"
+        className="btn-ship"
       >
         {loading ? (
           <>

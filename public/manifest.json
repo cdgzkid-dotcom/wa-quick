@@ -1,6 +1,6 @@
 {
   "name": "Sellia Connect",
-  "short_name": "Sellia",
+  "short_name": "Sellia Connect",
   "description": "Envía mensajes de WhatsApp rápidamente sin guardar contactos",
   "start_url": "/",
   "display": "standalone",

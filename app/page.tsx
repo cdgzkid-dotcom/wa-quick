@@ -113,8 +113,7 @@ function AppContent() {
               <h1 className="text-lg font-bold leading-tight font-space" style={{ color: 'var(--text)' }}>
                 Connect
               </h1>
-              <p className="text-xs" style={{ color: 'var(--text-dim)' }}>WhatsApp sin guardar contactos</p>
-              <p className="text-xs" style={{ color: 'var(--text-dim)' }}>Programa también tus mensajes de WhatsApp para otro día y hora conectando tus contactos de Google</p>
+              <p className="text-xs" style={{ color: 'var(--text-dim)' }}>Manda Whastapp sin guardar en contactos y programa tus mensajes para después conectando con tus contactos de google</p>
             </div>
           </div>
           <BellButton />

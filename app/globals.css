@@ -137,7 +137,7 @@
   /* Ship it now button */
   .btn-ship {
     width:           100%;
-    background:      #0B2A62;
+    background:      #0B2A62 !important;
     color:           var(--btn-text, #fff);
     font-family:     var(--font-space-mono, monospace);
     font-size:       1.125rem;
