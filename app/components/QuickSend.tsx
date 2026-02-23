@@ -217,7 +217,7 @@ export default function QuickSend({
         <svg viewBox="0 0 100 100" width="18" height="18" aria-hidden="true" style={{ fill: 'currentColor', flexShrink: 0 }}>
           <path d="M58 12L25 55H48L40 88L75 45H52L58 12Z"/>
         </svg>
-        Ship it now!!
+        Connect
       </button>
 
       {/* ── Recent contacts ── */}

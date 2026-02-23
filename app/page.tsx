@@ -108,13 +108,13 @@ function AppContent() {
         <div className="px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/assets/sellia-logo.png" alt="Sellia" width={38} height={38} style={{ borderRadius: '11px', objectFit: 'contain' }} />
+            <img src="/assets/sellia-icon.png" alt="Sellia" width={38} height={38} style={{ borderRadius: '11px', objectFit: 'contain' }} />
             <div>
-              <h1 className="text-lg font-bold leading-tight font-space">
-                <span style={{ color: 'var(--accent)' }}>sellia</span>{' '}
-                <span style={{ color: 'var(--text)' }}>Connect</span>
+              <h1 className="text-lg font-bold leading-tight font-space" style={{ color: 'var(--text)' }}>
+                Connect
               </h1>
               <p className="text-xs" style={{ color: 'var(--text-dim)' }}>WhatsApp sin guardar contactos</p>
+              <p className="text-xs" style={{ color: 'var(--text-dim)' }}>Programa también tus mensajes de WhatsApp para otro día y hora conectando tus contactos de Google</p>
             </div>
           </div>
           <BellButton />
