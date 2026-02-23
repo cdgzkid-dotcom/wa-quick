@@ -1,12 +1,7 @@
 # Quick Zap - Instrucciones para Claude Code
 
 ## Regla #1 — Cierre obligatorio de cada tarea
-Al terminar CUALQUIER tarea, siempre escribe:
-"✅ Listo. [resumen de cambios]. Commit: [hash]"
-Esta regla es innegociable y aplica sin excepción.
-
-## Al terminar cualquier tarea
-Siempre termina con: "✅ Listo. [resumen de cambios]. Commit: [hash]"
+Después de cada tarea SIEMPRE escribe "✅ Listo." en tu respuesta.
 ## Stack
 - Next.js 14, MongoDB Atlas, Web Push, PWA
 - Deploy: Vercel (auto-deploy desde GitHub)
