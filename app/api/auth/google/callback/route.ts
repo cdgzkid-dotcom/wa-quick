@@ -73,6 +73,7 @@ export async function GET(request: NextRequest) {
     return response
   } catch (err) {
     console.error('Google OAuth callback error:', err)
-    return fail('fallo')
+    const msg = err instanceof Error ? err.message : String(err)
+    return fail(encodeURIComponent(msg))
   }
 }
