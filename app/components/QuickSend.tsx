@@ -37,12 +37,14 @@ type Props = {
   initialPhone?:       string
   initialMessage?:     string
   initialCountryCode?: string
+  sessionId?:          string
 }
 
 export default function QuickSend({
   initialPhone = '',
   initialMessage = '',
   initialCountryCode = '52',
+  sessionId = '',
 }: Props) {
   const [countryCode, setCountryCode]       = useState('')
   const [phoneNumber, setPhoneNumber]       = useState('')
@@ -185,6 +187,7 @@ export default function QuickSend({
 
       {/* ── Google Contacts ── */}
       <GoogleContacts
+        sessionId={sessionId}
         onSelect={(phone, cc) => {
           setPhoneNumber(phone)
           setCountryCode(cc)

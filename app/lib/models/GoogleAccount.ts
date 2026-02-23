@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document, Model } from 'mongoose'
 
 export interface IGoogleAccount extends Document {
+  sessionId: string
   googleId: string
   email: string
   name: string
@@ -13,7 +14,8 @@ export interface IGoogleAccount extends Document {
 
 const schema = new Schema<IGoogleAccount>(
   {
-    googleId:     { type: String, required: true, unique: true },
+    sessionId:    { type: String, required: true },
+    googleId:     { type: String, required: true },
     email:        { type: String, required: true },
     name:         { type: String, required: true },
     picture:      { type: String, default: '' },
@@ -23,6 +25,9 @@ const schema = new Schema<IGoogleAccount>(
   },
   { timestamps: { createdAt: true, updatedAt: false } }
 )
+
+// Each session can connect the same Google account independently
+schema.index({ googleId: 1, sessionId: 1 }, { unique: true })
 
 const GoogleAccount: Model<IGoogleAccount> =
   mongoose.models.GoogleAccount ||

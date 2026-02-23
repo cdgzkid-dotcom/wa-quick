@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { google } from 'googleapis'
 
 function makeOAuth2Client(appUrl: string) {
@@ -9,7 +9,7 @@ function makeOAuth2Client(appUrl: string) {
   )
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
     return NextResponse.json(
       { error: 'Google OAuth no configurado. Define GOOGLE_CLIENT_ID y GOOGLE_CLIENT_SECRET.' },
@@ -17,8 +17,9 @@ export async function GET() {
     )
   }
 
+  const sessionId = new URL(request.url).searchParams.get('session_id') || ''
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-  const state = crypto.randomUUID()
+  const state = JSON.stringify({ nonce: crypto.randomUUID(), sessionId })
   const oauth2Client = makeOAuth2Client(appUrl)
 
   const authUrl = oauth2Client.generateAuthUrl({

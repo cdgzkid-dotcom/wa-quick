@@ -69,9 +69,10 @@ interface GAccount {
 
 interface Props {
   onSelect: (phone: string, countryCode: string) => void
+  sessionId: string
 }
 
-export default function GoogleContacts({ onSelect }: Props) {
+export default function GoogleContacts({ onSelect, sessionId }: Props) {
   const [expanded, setExpanded]           = useState(false)
   const [accounts, setAccounts]           = useState<GAccount[]>([])
   const [contacts, setContacts]           = useState<GContact[]>([])
@@ -83,6 +84,8 @@ export default function GoogleContacts({ onSelect }: Props) {
 
   // Don't render at all if Google OAuth is not configured
   if (!GOOGLE_ENABLED) return null
+
+  const sessionHeaders: Record<string, string> = sessionId ? { 'x-session-id': sessionId } : {}
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
@@ -99,20 +102,22 @@ export default function GoogleContacts({ onSelect }: Props) {
       setTimeout(() => setToast(''), 4000)
     }
 
-    // Load connected accounts
-    fetch('/api/auth/google/accounts')
+    if (!sessionId) return
+
+    // Load connected accounts for this session
+    fetch('/api/auth/google/accounts', { headers: sessionHeaders })
       .then((r) => r.json())
       .then((d) => { if (Array.isArray(d)) setAccounts(d) })
       .catch(console.error)
       .finally(() => setAccountsLoading(false))
-  }, [])
+  }, [sessionId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadContacts = useCallback(async () => {
     if (contacts.length > 0 || accounts.length === 0) return
     setContactsLoading(true)
     setContactsError('')
     try {
-      const res = await fetch('/api/contacts')
+      const res = await fetch('/api/contacts', { headers: sessionHeaders })
       const data = await res.json()
       if (Array.isArray(data)) setContacts(data)
       else setContactsError('Error al cargar contactos')
@@ -130,7 +135,7 @@ export default function GoogleContacts({ onSelect }: Props) {
   const handleDisconnect = async (id: string) => {
     await fetch('/api/auth/google/accounts', {
       method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...sessionHeaders },
       body: JSON.stringify({ id }),
     })
     setAccounts((prev) => prev.filter((a) => a.id !== id))
@@ -229,7 +234,7 @@ export default function GoogleContacts({ onSelect }: Props) {
 
           {/* Connect button */}
           <a
-            href="/api/auth/google/init"
+            href={`/api/auth/google/init${sessionId ? `?session_id=${encodeURIComponent(sessionId)}` : ''}`}
             className="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl text-sm font-medium shadow-sm active:opacity-70 transition-opacity"
             style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}
           >

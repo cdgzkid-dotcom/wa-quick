@@ -28,10 +28,11 @@ const COUNTRY_CODES = [
 
 type Props = {
   onScheduled: () => void
+  sessionId?: string
 }
 
 
-export default function ScheduleMessage({ onScheduled }: Props) {
+export default function ScheduleMessage({ onScheduled, sessionId = '' }: Props) {
   const [countryCode, setCountryCode] = useState('52')
   const [phoneNumber, setPhoneNumber] = useState('')
   const [message, setMessage] = useState('')
@@ -209,6 +210,7 @@ export default function ScheduleMessage({ onScheduled }: Props) {
 
       {/* Google Contacts */}
       <GoogleContacts
+        sessionId={sessionId}
         onSelect={(phone, cc) => {
           setPhoneNumber(phone)
           setCountryCode(cc)

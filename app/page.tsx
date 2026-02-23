@@ -24,6 +24,7 @@ function AppContent() {
   const [activeTab, setActiveTab]   = useState<Tab>(initialPhone ? 'quick' : tabFromUrl)
   const [refreshKey, setRefreshKey] = useState(0)
   const [showSuccess, setShowSuccess] = useState(false)
+  const [sessionId, setSessionId]   = useState('')
 
 
   // Deep-link state — starts from URL params, updated via postMessage from SW
@@ -34,6 +35,14 @@ function AppContent() {
   })
 
   useEffect(() => {
+    // Generate or recover anonymous session ID for isolating Google accounts per device
+    let id = localStorage.getItem('qz_session_id')
+    if (!id) {
+      id = crypto.randomUUID()
+      localStorage.setItem('qz_session_id', id)
+    }
+    setSessionId(id)
+
     // Register service worker
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw-custom.js').catch(console.error)
@@ -145,9 +154,10 @@ function AppContent() {
             initialPhone={deepLink.phone}
             initialMessage={deepLink.message}
             initialCountryCode={deepLink.countryCode}
+            sessionId={sessionId}
           />
         )}
-        {activeTab === 'schedule'  && <ScheduleMessage onScheduled={handleScheduled} />}
+        {activeTab === 'schedule'  && <ScheduleMessage onScheduled={handleScheduled} sessionId={sessionId} />}
         {activeTab === 'scheduled' && <ScheduledList refreshKey={refreshKey} />}
       </main>
 

@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { google } from 'googleapis'
 import { connectDB } from '@/app/lib/mongoose'
 import GoogleAccount, { IGoogleAccount } from '@/app/lib/models/GoogleAccount'
@@ -115,10 +115,11 @@ async function fetchContactsForAccount(account: IGoogleAccount): Promise<GoogleC
   return contacts
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const sessionId = request.headers.get('x-session-id') || ''
   try {
     await connectDB()
-    const accounts = await GoogleAccount.find()
+    const accounts = await GoogleAccount.find(sessionId ? { sessionId } : { sessionId: '__none__' })
     console.log(`[contacts] Connected accounts: ${accounts.length}`)
 
     if (accounts.length === 0) return NextResponse.json([])

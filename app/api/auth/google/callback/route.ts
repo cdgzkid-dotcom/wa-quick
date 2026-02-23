@@ -27,6 +27,17 @@ export async function GET(request: NextRequest) {
   const savedState = request.cookies.get('google_oauth_state')?.value
   if (!state || state !== savedState) return fail('estado_invalido')
 
+  // Parse state JSON to extract sessionId
+  let sessionId = ''
+  try {
+    const parsed = JSON.parse(state) as { nonce?: string; sessionId?: string }
+    sessionId = parsed.sessionId || ''
+  } catch {
+    return fail('estado_invalido')
+  }
+
+  if (!sessionId) return fail('sin_sesion')
+
   try {
     const oauth2Client = makeOAuth2Client(appUrl)
     const { tokens } = await oauth2Client.getToken(code)
@@ -41,6 +52,7 @@ export async function GET(request: NextRequest) {
     await connectDB()
 
     const fields: Record<string, unknown> = {
+      sessionId,
       email:       profile.email,
       name:        profile.name || profile.email,
       picture:     profile.picture || '',
@@ -51,7 +63,7 @@ export async function GET(request: NextRequest) {
     if (tokens.refresh_token) fields.refreshToken = tokens.refresh_token
 
     await GoogleAccount.findOneAndUpdate(
-      { googleId: profile.id },
+      { googleId: profile.id, sessionId },
       { $set: fields },
       { upsert: true, new: true }
     )
