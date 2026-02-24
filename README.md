@@ -141,3 +141,4 @@ wa-quick/
 | `VAPID_SUBJECT` | `mailto:tu@email.com` |
 | `CRON_SECRET` | Secreto para el endpoint cron |
 
+
