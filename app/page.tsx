@@ -158,8 +158,9 @@ function AppContent() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/assets/sellia-icon.png" alt="Sellia" width={38} height={38} style={{ borderRadius: '11px', objectFit: 'contain' }} />
             <div>
-              <h1 className="text-lg font-bold leading-tight font-space" style={{ color: 'var(--text)' }}>
-                Connect
+              <h1 className="text-lg font-bold leading-tight font-space flex items-baseline gap-1">
+                <span style={{ fontFamily: 'var(--font-nunito)', fontWeight: 800, fontStyle: 'italic', color: 'var(--sellia-wordmark)' }}>sellia</span>
+                <span style={{ color: 'var(--text)' }}>Connect</span>
               </h1>
               <p className="text-xs" style={{ color: 'var(--text-dim)' }}>Manda Whastapp sin guardar en contactos y programa tus mensajes para después conectando con tus contactos de google</p>
             </div>

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Space_Mono, DM_Sans } from 'next/font/google'
+import { Space_Mono, DM_Sans, Nunito } from 'next/font/google'
 import './globals.css'
 
 const spaceMono = Space_Mono({
@@ -12,6 +12,14 @@ const spaceMono = Space_Mono({
 const dmSans = DM_Sans({
   subsets: ['latin'],
   variable: '--font-dm-sans',
+  display: 'swap',
+})
+
+const nunito = Nunito({
+  subsets: ['latin'],
+  weight: ['800'],
+  style: ['italic'],
+  variable: '--font-nunito',
   display: 'swap',
 })
 
@@ -46,7 +54,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" className={`${spaceMono.variable} ${dmSans.variable}`}>
+    <html lang="es" className={`${spaceMono.variable} ${dmSans.variable} ${nunito.variable}`}>
       <head>
         {/* Theme detection — must run before first paint */}
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />

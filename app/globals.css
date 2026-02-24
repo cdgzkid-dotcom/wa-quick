@@ -28,6 +28,9 @@
   /* Ship it now button */
   --btn-text:     #ffffff;
   --btn-shadow:   0 4px 16px rgba(11,42,98,0.30);
+
+  /* Sellia wordmark */
+  --sellia-wordmark: #000000;
 }
 
 .theme-dark {
@@ -54,6 +57,9 @@
   /* Ship it now button */
   --btn-text:     #ffffff;
   --btn-shadow:   0 0 24px rgba(11,42,98,0.60);
+
+  /* Sellia wordmark */
+  --sellia-wordmark: #ffffff;
 }
 
 /* prefers-color-scheme fallback (before JS sets the class) */
@@ -76,6 +82,7 @@
     --phone-glow:   0 0 12px rgba(255,255,255,0.25);
     --btn-text:     #ffffff;
     --btn-shadow:   0 0 24px rgba(11,42,98,0.60);
+    --sellia-wordmark: #ffffff;
   }
 }
 
