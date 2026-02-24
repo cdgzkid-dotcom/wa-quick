@@ -53,6 +53,7 @@ export async function GET(request: NextRequest) {
 
     const fields: Record<string, unknown> = {
       sessionId,
+      googleId:    profile.id,
       email:       profile.email,
       name:        profile.name || profile.email,
       picture:     profile.picture || '',
