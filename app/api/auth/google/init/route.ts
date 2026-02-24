@@ -41,6 +41,7 @@ export async function GET(request: NextRequest) {
     maxAge: 600, // 10 min
     sameSite: 'lax', // Required for OAuth redirects
     path: '/',
+    domain: process.env.NODE_ENV === 'production' ? '.sellia.ai' : undefined,
   })
   return response
 }
