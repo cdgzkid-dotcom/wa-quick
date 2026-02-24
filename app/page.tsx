@@ -96,8 +96,14 @@ function AppContent() {
     const interval = setInterval(poll, 1000)
 
     // Also poll immediately when the tab becomes visible (e.g. user opens app from notification)
+    // Retry with delays to cover iOS cases where the app takes time to become visible
     const onVisibility = () => {
-      if (document.visibilityState === 'visible') poll()
+      if (document.visibilityState !== 'visible') return
+      poll()
+      setTimeout(poll, 500)
+      setTimeout(poll, 1000)
+      setTimeout(poll, 2000)
+      setTimeout(poll, 3000)
     }
     document.addEventListener('visibilitychange', onVisibility)
 
