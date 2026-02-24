@@ -18,7 +18,7 @@ export async function GET() {
     }
 
     const doc = await PendingDeepLink.findOneAndUpdate(
-      { createdAt: { $gte: new Date(Date.now() - 60000) }, used: false },
+      { createdAt: { $gte: new Date(Date.now() - 3 * 60 * 1000) }, used: false },
       { used: true },
       { sort: { createdAt: -1 }, new: false }
     ).lean()
@@ -26,11 +26,11 @@ export async function GET() {
     if (!doc) {
       if (latest && latest.used) {
         console.log('[deeplink] no result: most recent doc is already used=true')
-      } else if (latest && latest.createdAt < new Date(Date.now() - 60000)) {
-        console.log('[deeplink] no result: most recent doc is older than 60 seconds (createdAt=%s)',
+      } else if (latest && latest.createdAt < new Date(Date.now() - 3 * 60 * 1000)) {
+        console.log('[deeplink] no result: most recent doc is older than 3 minutes (createdAt=%s)',
           latest.createdAt)
       } else {
-        console.log('[deeplink] no result: no unused docs within 60 seconds')
+        console.log('[deeplink] no result: no unused docs within 3 minutes')
       }
       return NextResponse.json(null)
     }
