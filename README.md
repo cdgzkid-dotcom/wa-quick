@@ -142,3 +142,4 @@ wa-quick/
 | `CRON_SECRET` | Secreto para el endpoint cron |
 
 
+
