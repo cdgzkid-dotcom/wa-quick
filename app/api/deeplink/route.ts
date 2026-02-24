@@ -6,7 +6,7 @@ export async function GET() {
   try {
     await connectDB()
 
-    const fiveMinutesAgo = new Date(Date.now() - 60 * 1000)
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000)
 
     const totalCount = await PendingDeepLink.countDocuments()
     const latest = await PendingDeepLink.findOne().sort({ createdAt: -1 }).lean()
