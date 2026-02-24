@@ -50,7 +50,7 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close()
 
   const { action } = event
-  const { waUrl, url } = event.notification.data
+  const { waUrl, url, phone, countryCode, message } = event.notification.data
 
   if (action === 'send' && waUrl) {
     event.waitUntil(clients.openWindow(waUrl))
@@ -62,6 +62,7 @@ self.addEventListener('notificationclick', (event) => {
       clients.matchAll({ type: 'window' }).then((clientList) => {
         for (const client of clientList) {
           if (client.url === '/' && 'focus' in client) {
+            client.postMessage({ type: 'DEEPLINK', phone, countryCode, message, waUrl })
             return client.focus()
           }
         }
