@@ -48,6 +48,7 @@ export default function ScheduledList({ refreshKey }: { refreshKey: number }) {
   const [messages, setMessages] = useState<ScheduledMessage[]>([])
   const [loading, setLoading] = useState(true)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [deletingAll, setDeletingAll] = useState(false)
   const [editing, setEditing] = useState<EditingState | null>(null)
   const [savingEdit, setSavingEdit] = useState(false)
   const [filter, setFilter] = useState<'pending' | 'sent' | 'all'>('pending')
@@ -123,6 +124,20 @@ export default function ScheduledList({ refreshKey }: { refreshKey: number }) {
       console.error('Edit error:', err)
     } finally {
       setSavingEdit(false)
+    }
+  }
+
+  const handleDeleteAll = async () => {
+    const label = filter === 'pending' ? 'pendientes' : filter === 'sent' ? 'enviados' : 'todos'
+    if (!confirm(`¿Eliminar todos los mensajes ${label}? Esta acción no se puede deshacer.`)) return
+    setDeletingAll(true)
+    try {
+      await Promise.all(filtered.map((m) => fetch(`/api/messages/${m.id}`, { method: 'DELETE' })))
+      await fetchMessages()
+    } catch (err) {
+      console.error('Delete all error:', err)
+    } finally {
+      setDeletingAll(false)
     }
   }
 
@@ -297,6 +312,24 @@ export default function ScheduledList({ refreshKey }: { refreshKey: number }) {
             </div>
           ))}
         </div>
+      )}
+
+      {/* Delete all button — only shown when there are messages in the active tab */}
+      {filtered.length > 0 && (
+        <button
+          onClick={handleDeleteAll}
+          disabled={deletingAll}
+          className="w-full text-sm text-red-400 hover:text-red-600 py-2 flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+        >
+          {deletingAll ? (
+            <div className="h-4 w-4 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+            </svg>
+          )}
+          {deletingAll ? 'Borrando...' : `Borrar todos los ${filter === 'pending' ? 'pendientes' : filter === 'sent' ? 'enviados' : 'mensajes'}`}
+        </button>
       )}
 
       {/* Refresh button */}
