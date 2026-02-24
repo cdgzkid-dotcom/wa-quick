@@ -25,6 +25,8 @@ function AppContent() {
   const [refreshKey, setRefreshKey] = useState(0)
   const [showSuccess, setShowSuccess] = useState(false)
   const [sessionId, setSessionId]   = useState('')
+  const [debugLogs, setDebugLogs]   = useState<string[]>([])
+  const debugMode = searchParams.get('debug') === '1'
 
 
   // Deep-link state — starts from URL params, updated via postMessage from SW
@@ -33,6 +35,18 @@ function AppContent() {
     message:     initialMessage,
     countryCode: initialCountryCode,
   })
+
+  // Intercept console.log to show on-screen when ?debug=1
+  useEffect(() => {
+    if (!debugMode) return
+    const orig = console.log.bind(console)
+    console.log = (...args: unknown[]) => {
+      orig(...args)
+      const line = args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ')
+      setDebugLogs(prev => [...prev.slice(-4), line])
+    }
+    return () => { console.log = orig }
+  }, [debugMode])
 
   useEffect(() => {
     // Generate or recover anonymous session ID for isolating Google accounts per device
@@ -173,6 +187,18 @@ function AppContent() {
         {activeTab === 'schedule'  && <ScheduleMessage onScheduled={handleScheduled} sessionId={sessionId} />}
         {activeTab === 'scheduled' && <ScheduledList refreshKey={refreshKey} />}
       </main>
+
+      {/* Debug log panel — only shown when ?debug=1 */}
+      {debugMode && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 p-2" style={{ background: '#000', borderTop: '1px solid #00ff00' }}>
+          {debugLogs.length === 0
+            ? <p style={{ color: '#00ff00', fontSize: '10px', fontFamily: 'monospace' }}>— no logs yet —</p>
+            : debugLogs.map((log, i) => (
+              <p key={i} style={{ color: '#00ff00', fontSize: '10px', fontFamily: 'monospace', wordBreak: 'break-all' }}>{log}</p>
+            ))
+          }
+        </div>
+      )}
 
       {/* Bottom safe area */}
       <div className="safe-bottom h-4" />
