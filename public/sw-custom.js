@@ -62,6 +62,7 @@ self.addEventListener('notificationclick', (event) => {
       clients.matchAll({ type: 'window' }).then((clientList) => {
         for (const client of clientList) {
           if (client.url === '/' && 'focus' in client) {
+            console.log('[SW] sending DEEPLINK postMessage → phone=%s | countryCode=%s', phone, countryCode)
             client.postMessage({ type: 'DEEPLINK', phone, countryCode, message, waUrl })
             return client.focus()
           }

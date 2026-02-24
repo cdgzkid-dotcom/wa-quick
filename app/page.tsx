@@ -83,10 +83,11 @@ function AppContent() {
   // Listen for DEEPLINK postMessage from service worker (instant, no polling delay)
   useEffect(() => {
     const handler = (event: MessageEvent) => {
+      console.log('[SW message] received:', event.data)
       if (event.data?.type !== 'DEEPLINK') return
       const { phone, countryCode, message } = event.data
       if (!phone || !countryCode) return
-      console.log('[deeplink] postMessage received → phone=%s | countryCode=%s', phone, countryCode)
+      console.log('[deeplink] postMessage DEEPLINK → phone=%s | countryCode=%s | message=%s', phone, countryCode, message)
       setActiveTab('quick')
       setDeepLink({ phone, countryCode, message: message || '' })
     }
