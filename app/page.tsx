@@ -90,7 +90,17 @@ function AppContent() {
     }
 
     const interval = setInterval(poll, 3000)
-    return () => clearInterval(interval)
+
+    // Also poll immediately when the tab becomes visible (e.g. user opens app from notification)
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') poll()
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+
+    return () => {
+      clearInterval(interval)
+      document.removeEventListener('visibilitychange', onVisibility)
+    }
   }, [])
 
   // Listen for DEEPLINK postMessage from service worker (instant, no polling delay)
