@@ -153,7 +153,7 @@
     cursor:          pointer;
     transition:      opacity 0.15s, box-shadow 0.15s;
   }
-  .btn-ship:disabled  { opacity: 0.45; cursor: not-allowed; }
+  .btn-ship:disabled  { background-color: #0B2A62 !important; color: white !important; opacity: 1 !important; cursor: not-allowed; }
   .btn-ship:active:not(:disabled) { opacity: 0.82; }
 
   /* Legacy buttons kept for ScheduleMessage / ScheduledList */

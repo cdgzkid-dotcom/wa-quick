@@ -76,7 +76,7 @@ export default function BellButton() {
   }
 
   const dotColor = subscribed
-    ? 'bg-whatsapp-green animate-pulse'
+    ? 'bg-[#22c55e] animate-pulse'
     : denied
     ? 'bg-red-400'
     : 'bg-gray-400'
