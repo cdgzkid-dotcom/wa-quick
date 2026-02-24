@@ -219,6 +219,19 @@ function AppContent() {
         </div>
       )}
 
+      {/* Footer */}
+      <div className="text-center pb-3 pt-1">
+        <a
+          href="https://wa.quick.sellia.ai/politica-de-privacidad.html"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-xs"
+          style={{ color: 'var(--text-dim)' }}
+        >
+          Política de Privacidad
+        </a>
+      </div>
+
       {/* Bottom safe area */}
       <div className="safe-bottom h-4" />
     </div>
