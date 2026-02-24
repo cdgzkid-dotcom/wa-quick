@@ -138,3 +138,4 @@ wa-quick/
 | `VAPID_PRIVATE_KEY` | Clave privada VAPID |
 | `VAPID_SUBJECT` | `mailto:tu@email.com` |
 | `CRON_SECRET` | Secreto para el endpoint cron |
+
