@@ -89,7 +89,10 @@ function AppContent() {
       }
     }
 
-    const interval = setInterval(poll, 3000)
+    // Poll immediately on mount
+    poll()
+
+    const interval = setInterval(poll, 1000)
 
     // Also poll immediately when the tab becomes visible (e.g. user opens app from notification)
     const onVisibility = () => {
