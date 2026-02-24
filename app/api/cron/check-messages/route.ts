@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
       const sendUrl = `/?tab=quick&phone=${encodeURIComponent(phone)}&countryCode=${encodeURIComponent(cc)}${msg.message ? `&message=${encodeURIComponent(msg.message)}` : ''}`
 
       const payload = {
-        title: '⚡ Quick Zap - Mensaje Programado',
+        title: 'Sellia Connect - Mensaje Programado',
         body: `Recordatorio: enviar mensaje a +${fullPhone}${msg.message ? `\n"${msg.message.substring(0, 50)}${msg.message.length > 50 ? '...' : ''}"` : ''}`,
         url: sendUrl,
         messageId: msg._id.toString(),
@@ -75,19 +75,23 @@ export async function GET(request: NextRequest) {
         waUrl,
       }
 
+      let atLeastOneSent = false
       for (const sub of subscriptions) {
         const result = await sendPushNotification(sub, payload)
         if (result.expired) {
           expiredEndpoints.push(sub.endpoint)
         } else {
-          await PendingDeepLink.create({
-            phone,
-            countryCode: cc,
-            message: msg.message || '',
-            subscriptionEndpoint: sub.endpoint,
-            used: false,
-          })
+          atLeastOneSent = true
         }
+      }
+
+      if (atLeastOneSent) {
+        await PendingDeepLink.create({
+          phone,
+          countryCode: cc,
+          message: msg.message || '',
+          used: false,
+        })
       }
 
       await ScheduledMessage.findByIdAndUpdate(msg._id, { notified: true, sent: true })
