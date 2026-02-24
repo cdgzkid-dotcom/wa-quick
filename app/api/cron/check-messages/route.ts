@@ -22,11 +22,18 @@ export async function GET(request: NextRequest) {
     const now = new Date()
     const twoMinutesAgo = new Date(now.getTime() - 2 * 60 * 1000)
 
-    const pendingMessages = await ScheduledMessage.find({
-      sent: false,
-      notified: false,
-      scheduledAt: { $gte: twoMinutesAgo, $lte: now },
-    }).lean()
+    // Atomically claim messages one by one to prevent race conditions
+    // when the cron runs in parallel (find + update in a single operation)
+    const pendingMessages = []
+    while (true) {
+      const claimed = await ScheduledMessage.findOneAndUpdate(
+        { sent: false, notified: false, scheduledAt: { $gte: twoMinutesAgo, $lte: now } },
+        { notified: true, sent: true },
+        { new: false }
+      ).lean()
+      if (!claimed) break
+      pendingMessages.push(claimed)
+    }
 
     if (pendingMessages.length === 0) {
       return NextResponse.json({ notified: 0, message: 'No hay mensajes pendientes' })
@@ -94,7 +101,6 @@ export async function GET(request: NextRequest) {
         })
       }
 
-      await ScheduledMessage.findByIdAndUpdate(msg._id, { notified: true, sent: true })
       notifiedCount++
     }
 
