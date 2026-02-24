@@ -25,6 +25,9 @@ self.addEventListener('push', (event) => {
       messageId: data.messageId,
       phoneNumber: data.phoneNumber,
       waUrl: data.waUrl,
+      phone: data.phone,
+      countryCode: data.countryCode,
+      message: data.message,
     },
     actions: [
       {
