@@ -129,6 +129,8 @@ wa-quick/
 └── worker/index.js                # Push handler para next-pwa
 ```
 
+<!-- Updated: Feb 2026 — rebranded to Sellia Connect -->
+
 ## Variables en Vercel
 
 | Variable | Descripción |
