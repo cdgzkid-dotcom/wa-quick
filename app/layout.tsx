@@ -16,8 +16,8 @@ const dmSans = DM_Sans({
 })
 
 // Inline theme-detection script — runs synchronously before paint to avoid FOUC.
-// Night = 8 pm (20h) – 6 am. Fallback: prefers-color-scheme (handled via CSS).
-const themeScript = `(function(){try{var h=new Date().getHours();document.documentElement.classList.add(h<6||h>=20?'theme-dark':'theme-light')}catch(e){}})()`
+// Night = 7 pm (19h) – 8 am. Fallback: prefers-color-scheme (handled via CSS).
+const themeScript = `(function(){try{var h=new Date().getHours();document.documentElement.classList.add(h<8||h>=19?'theme-dark':'theme-light')}catch(e){}})()`
 
 export const metadata: Metadata = {
   title: 'Sellia Connect',
