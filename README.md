@@ -141,7 +141,7 @@ wa-quick/
 | `VAPID_SUBJECT` | `mailto:tu@email.com` |
 | `CRON_SECRET` | Secreto para el endpoint cron |
 
-<!-- test deploy 2 -->
+<!-- test deploy 3 -->
 
 
 
