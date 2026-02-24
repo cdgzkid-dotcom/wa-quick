@@ -66,7 +66,7 @@ self.addEventListener('notificationclick', (event) => {
           }
         }
         if (clients.openWindow) {
-          return clients.openWindow(waUrl || url || '/')
+          return clients.openWindow(url || '/')
         }
       })
     )
