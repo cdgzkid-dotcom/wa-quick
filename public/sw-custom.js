@@ -66,8 +66,19 @@ self.addEventListener('notificationclick', (event) => {
   } else if (action === 'dismiss') {
     // Just close - already done above
   } else {
-    // Default click - open WhatsApp directly
-    event.waitUntil(clients.openWindow(waUrl))
+    // Default click - open the app
+    event.waitUntil(
+      clients.matchAll({ type: 'window' }).then((clientList) => {
+        for (const client of clientList) {
+          if (client.url === '/' && 'focus' in client) {
+            return client.focus()
+          }
+        }
+        if (clients.openWindow) {
+          return clients.openWindow(waUrl || url || '/')
+        }
+      })
+    )
   }
 })
 
