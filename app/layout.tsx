@@ -50,7 +50,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         {/* Theme detection — must run before first paint */}
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-        <meta name="google-site-verification" content="y-4xO2de01waw1QxnP86oMOvcKK0cl_AsYGaUG6s3rs" />
         <meta name="google-site-verification" content="kZ_urcunzlwtKxCrlnAYVaiMQxhw_7lSy86EE8W8i5c" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
