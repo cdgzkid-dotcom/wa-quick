@@ -84,6 +84,7 @@ function AppContent() {
         if (!data || !data.phone || !data.countryCode) return
         setActiveTab('quick')
         setDeepLink({ phone: data.phone, countryCode: data.countryCode, message: data.message || '' })
+        window.location.href = `https://wa.me/${data.countryCode}${data.phone}?text=${encodeURIComponent(data.message || '')}`
       } catch {
         // ignore network errors
       }
