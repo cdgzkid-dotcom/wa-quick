@@ -1,8 +1,14 @@
 // Custom Service Worker for WA Quick
 // Handles push notifications and offline caching
+const SW_VERSION = '2.0.0'
 
 self.addEventListener('install', (event) => {
   self.skipWaiting()
+  event.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.map(key => caches.delete(key)))
+    )
+  )
 })
 
 self.addEventListener('activate', (event) => {
