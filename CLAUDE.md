@@ -7,56 +7,74 @@
 4. 🚀 Deploy: `npm run deploy` o push a main (auto-deploy en Vercel)
 5. 🧪 No hay staging — las pruebas son en producción
 6. 🔒 Nunca exponer secrets en código ni en logs
+7. 🚫 **NUNCA correr nada en local** — ni `npm run dev`, ni `next dev`, ni ningún servidor local. Todo se prueba directo en producción vía push a main → Vercel auto-deploy. Correr en local causa conflictos con variables de entorno, OAuth redirects, service workers y PWA que solo funcionan en el dominio de producción. Si cualquier agente intenta correr un servidor local, detenlo inmediatamente.
 
 ## Proyecto
-- **Nombre:** Sellia Connect
-- **URL:** https://wa.quick.sellia.ai
-- **Repo:** https://github.com/cdgzkid-dotcom/wa-quick
-- **Stack:** Next.js 14, MongoDB Atlas, Vercel Hobby, PWA
-- **Health check:** `npm run health` (17/17 checks)
-- **Tag estable:** `stable-v1` (commit `13c985f`)
+* **Nombre:** Sellia Connect
+* **URL:** https://wa.quick.sellia.ai
+* **Repo:** https://github.com/cdgzkid-dotcom/wa-quick
+* **Stack:** Next.js 14, MongoDB Atlas, Vercel Hobby, PWA
+* **Health check:** `npm run health` (17/17 checks)
+* **Tag estable:** `stable-v1` (commit `13c985f`)
 
 ## Infraestructura
-- **Cron:** cron-job.org cada minuto → `/api/cron/check-messages` con `Authorization: Bearer waQuickSecret123`
-- **DB:** MongoDB Atlas cluster1.ryqtobh.mongodb.net, usuario `cdgzkid_db_user`
-- **Deploy:** Vercel Hobby (auto-deploy desde GitHub main)
-- **OAuth redirect:** `https://wa.quick.sellia.ai/api/auth/google/callback`
+* **Cron:** cron-job.org cada minuto → `/api/cron/check-messages` con `Authorization: Bearer waQuickSecret123`
+* **DB:** MongoDB Atlas cluster1.ryqtobh.mongodb.net, usuario `cdgzkid_db_user`
+* **Deploy:** Vercel Hobby (auto-deploy desde GitHub main)
+* **OAuth redirect:** `https://wa.quick.sellia.ai/api/auth/google/callback`
 
 ## Variables de entorno (Vercel)
-- `NEXT_PUBLIC_APP_URL` = `https://wa.quick.sellia.ai`
-- `MONGODB_URI` = `mongodb+srv://cdgzkid_db_user:<password>@cluster1.ryqtobh.mongodb.net/`
-- `CRON_SECRET` = `waQuickSecret123`
-- `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` / `NEXT_PUBLIC_GOOGLE_CLIENT_ID`
-- `NEXT_PUBLIC_VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` / `VAPID_SUBJECT`
+* `NEXT_PUBLIC_APP_URL` = `https://wa.quick.sellia.ai`
+* `MONGODB_URI` = `mongodb+srv://cdgzkid_db_user:<password>@cluster1.ryqtobh.mongodb.net/`
+* `CRON_SECRET` = `waQuickSecret123`
+* `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` / `NEXT_PUBLIC_GOOGLE_CLIENT_ID`
+* `NEXT_PUBLIC_VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` / `VAPID_SUBJECT`
 
 ## Colecciones MongoDB
-- `scheduledmessages` — mensajes programados pendientes/enviados
-- `pendingdeeplinks` — deep links de notificaciones (TTL 60s)
-- `pushsubscriptions` — suscripciones push por usuario
-- `googleaccounts` — tokens OAuth de Google por sessionId
+* `scheduledmessages` — mensajes programados pendientes/enviados
+* `pendingdeeplinks` — deep links de notificaciones (TTL 60s)
+* `pushsubscriptions` — suscripciones push por usuario
+* `googleaccounts` — tokens OAuth de Google por sessionId
 
 ## Arquitectura de features
 
 ### Tema automático
-- Dark: 7pm–8am | Light: 8am–7pm
-- Clase `theme-dark` / `theme-light` en `<html>`
-- CSS variables: `--bg`, `--card`, `--text`, `--accent` (#25D366), etc.
+* Dark: 7pm–8am | Light: 8am–7pm
+* Clase `theme-dark` / `theme-light` en `<html>`
+* CSS variables: `--bg`, `--card`, `--text`, `--accent` (#25D366), etc.
 
 ### Deep link desde notificaciones
-- Cron guarda `PendingDeepLink` en MongoDB al enviar push
-- `page.tsx` hace polling cada 3s a `/api/deeplink`
-- Poll inmediato en `visibilitychange` y `focus`
-- Al detectar: `setActiveTab('quick')` → `setDeepLink()` → form pre-cargado
+* Cron guarda `PendingDeepLink` en MongoDB al enviar push
+* `page.tsx` hace polling cada 3s a `/api/deeplink`
+* Poll inmediato en `visibilitychange` y `focus`
+* Al detectar: `setActiveTab('quick')` → `setDeepLink()` → form pre-cargado
 
 ### Google Contacts
-- Aislamiento por `sessionId` (localStorage `qz_session_id`)
-- OAuth flow: init → Google → callback → guarda token en `googleaccounts`
-- Scope: `contacts.readonly` (app en modo prueba, max 100 test users)
+* Aislamiento por `sessionId` (localStorage `qz_session_id`)
+* OAuth flow: init → Google → callback → guarda token en `googleaccounts`
+* Scope: `contacts.readonly` (app en modo prueba, max 100 test users)
 
 ### Push Notifications
-- VAPID keys configuradas en Vercel
-- Service worker: `worker/index.js`
-- Suscripciones guardadas en `pushsubscriptions`
+* VAPID keys configuradas en Vercel
+* Service worker: `worker/index.js`
+* Suscripciones guardadas en `pushsubscriptions`
+
+## ⚠️ Entorno de desarrollo — Solo producción
+
+**No existe entorno local.** Todo el flujo de desarrollo es:
+1. Editar código (Claude Code o GitHub)
+2. Commit + push a `main`
+3. Vercel auto-deploy en ~30s
+4. Probar en https://wa.quick.sellia.ai
+
+**¿Por qué no local?**
+* OAuth redirects apuntan al dominio de producción — en local fallan
+* Service workers y push notifications requieren HTTPS con el dominio correcto
+* Las variables de entorno viven en Vercel, no hay `.env.local`
+* PWA manifest, scope y start_url están hardcodeados al dominio de producción
+* Evita el clásico "funciona en local pero no en prod" — si funciona, funciona
+
+**Si Claude Code o cualquier agente intenta correr `npm run dev` o `next dev`, detenlo inmediatamente.**
 
 ## Bugs resueltos (no reintroducir)
 1. **iOS deep link** — usar polling servidor + visibilitychange, NO postMessage del SW
