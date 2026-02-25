@@ -33,8 +33,10 @@ Equivale a: `git push origin main && export $(cat .env.deploy | xargs) && npx ve
 
 ## Variables de entorno clave (Vercel)
 - `NEXT_PUBLIC_APP_URL` = `https://wa.quick.sellia.ai` (sin espacios, sin trailing slash)
-- `MONGODB_URI` = URI de MongoDB Atlas
+- `MONGODB_URI` = `mongodb+srv://cdgzkid_db_user:<password>@cluster1.ryqtobh.mongodb.net/?appName=Cluster1`
+  - ⚠️ Si el cron da 500 con `bad auth`, la contraseña del usuario Atlas cambió → actualizar con `npx vercel env rm MONGODB_URI production` y re-agregar
 - `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` = OAuth de Google Cloud Console
+- `CRON_SECRET` = `waQuickSecret123` (header `Authorization: Bearer <secret>` requerido en producción)
 
 ## Google OAuth
 - **Proyecto GCP**: "QuickZap"
@@ -63,8 +65,17 @@ Equivale a: `git push origin main && export $(cat .env.deploy | xargs) && npx ve
 ## Colecciones MongoDB principales
 - `scheduledmessages` — mensajes programados
 - `pendingdeeplinks` — deeplinks generados por cron (`used: false` = pendiente)
+  - Modelo: `phone`, `countryCode`, `message`, `subscriptionEndpoint` (default `''`), `used`, `createdAt`
+  - ⚠️ `subscriptionEndpoint` NO es required — no se pasa en `PendingDeepLink.create()`
 - `contacts` — contactos del usuario
 - `pushsubscriptions` — suscripciones Web Push
+
+## Bugs conocidos resueltos (historial)
+| Fecha | Bug | Fix |
+|---|---|---|
+| 2026-02-24 | `check-messages` 500: `subscriptionEndpoint required:true` pero no se pasaba en `.create()` | Cambiado a `default: ''` en `PendingDeepLink.ts` |
+| 2026-02-24 | `check-messages` 500: `bad auth` MongoDB Atlas | Contraseña del usuario Atlas había cambiado → actualizada en Vercel `MONGODB_URI` |
+| 2026-02-24 | `NEXT_PUBLIC_APP_URL` apuntaba a `wa-quick.vercel.app` | Actualizada a `https://wa.quick.sellia.ai` en Vercel env (production) |
 
 ## Git
 ```bash
