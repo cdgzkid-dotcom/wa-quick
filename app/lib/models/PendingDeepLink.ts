@@ -14,7 +14,7 @@ const PendingDeepLinkSchema = new Schema<IPendingDeepLink>(
     phone: { type: String, required: true },
     countryCode: { type: String, required: true },
     message: { type: String, default: '' },
-    subscriptionEndpoint: { type: String, required: true },
+    subscriptionEndpoint: { type: String, default: '' },
     used: { type: Boolean, default: false },
   },
   {
