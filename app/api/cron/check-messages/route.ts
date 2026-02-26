@@ -113,6 +113,11 @@ export async function GET(request: NextRequest) {
       expiredSubscriptionsRemoved: expiredEndpoints.length,
     })
   } catch (error) {
+    // Limpiar conexión cacheada para forzar reconexión en el siguiente intento
+    if (globalThis._mongooseConn) {
+      globalThis._mongooseConn.conn = null
+      globalThis._mongooseConn.promise = null
+    }
     console.error('Error checking messages:', error)
     return NextResponse.json({ error: 'Error al verificar mensajes' }, { status: 500 })
   }
