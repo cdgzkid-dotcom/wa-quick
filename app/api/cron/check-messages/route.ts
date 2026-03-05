@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
       const fullPhone = `${cc}${phone}`
       const waUrl = `https://wa.me/${fullPhone}${msg.message ? `?text=${encodeURIComponent(msg.message)}` : ''}`
 
-      const sendUrl = `/?tab=quick&auto=1&phone=${encodeURIComponent(phone)}&countryCode=${encodeURIComponent(cc)}${msg.message ? `&message=${encodeURIComponent(msg.message)}` : ''}`
+      const sendUrl = `/?tab=quick&phone=${encodeURIComponent(phone)}&countryCode=${encodeURIComponent(cc)}${msg.message ? `&message=${encodeURIComponent(msg.message)}` : ''}`
 
       const payload = {
         title: 'Sellia Connect - Mensaje Programado',
