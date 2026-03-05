@@ -27,7 +27,15 @@ function AppContent() {
   const [sessionId, setSessionId]   = useState('')
   const [debugLogs, setDebugLogs]   = useState<string[]>([])
   const debugMode = searchParams.get('debug') === '1'
+  const autoRedirect = searchParams.get('auto') === '1'
 
+  // Auto-redirect to WhatsApp when opened from notification (auto=1 in URL)
+  // More reliable than window.location.href inside a poll on iOS PWA
+  useEffect(() => {
+    if (!autoRedirect || !initialPhone || !initialCountryCode) return
+    const waUrl = `https://wa.me/${initialCountryCode}${initialPhone}${initialMessage ? `?text=${encodeURIComponent(initialMessage)}` : ''}`
+    window.location.href = waUrl
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Deep-link state — starts from URL params, updated via postMessage from SW
   const [deepLink, setDeepLink] = useState<DeepLink>({
