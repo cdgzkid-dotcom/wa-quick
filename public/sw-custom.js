@@ -66,16 +66,18 @@ self.addEventListener('notificationclick', (event) => {
   } else if (action === 'dismiss') {
     // Just close - already done above
   } else {
-    // Default click - open the app
+    // Default click - open/focus the app so polling picks up the deeplink
     event.waitUntil(
-      clients.matchAll({ type: 'window' }).then((clientList) => {
+      clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
         for (const client of clientList) {
-          if (client.url === '/' && 'focus' in client) {
+          // Match any tab from this origin (not just '/')
+          if (client.url.startsWith(self.location.origin) && 'focus' in client) {
             return client.focus()
           }
         }
+        // Open the app URL (not waUrl) so visibilitychange triggers polling → deeplink → WhatsApp
         if (clients.openWindow) {
-          return clients.openWindow(waUrl || url || '/')
+          return clients.openWindow(url || '/')
         }
       })
     )
