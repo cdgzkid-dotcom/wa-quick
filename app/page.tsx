@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect, useLayoutEffect, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import QuickSend from './components/QuickSend'
 import ScheduleMessage from './components/ScheduleMessage'
@@ -36,10 +36,19 @@ function AppContent() {
     countryCode: initialCountryCode,
   })
 
-  // WhatsApp overlay — shown when app is opened from a notification
+  // WhatsApp overlay — shown when app is opened from a notification (fallback if auto-redirect fails)
   const [waOverlay, setWaOverlay] = useState<DeepLink | null>(
     fromNotif && initialPhone ? { phone: initialPhone, message: initialMessage, countryCode: initialCountryCode } : null
   )
+
+  // Auto-redirect to WhatsApp when app is cold-started from a notification.
+  // https://wa.me/ is a universal link — iOS opens WhatsApp directly, no user gesture needed.
+  useLayoutEffect(() => {
+    if (!fromNotif || !initialPhone) return
+    const clean = initialPhone.replace(/\D/g, '')
+    const full  = `${initialCountryCode}${clean}`
+    window.location.href = `https://wa.me/${full}${initialMessage ? `?text=${encodeURIComponent(initialMessage)}` : ''}`
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Intercept console.log to show on-screen when ?debug=1
   useEffect(() => {
@@ -89,7 +98,11 @@ function AppContent() {
         if (!data || !data.phone || !data.countryCode) return
         setActiveTab('quick')
         setDeepLink({ phone: data.phone, countryCode: data.countryCode, message: data.message || '' })
-        // Show overlay so user can open WhatsApp with a direct tap
+        // Auto-redirect to WhatsApp — https://wa.me/ is a universal link, no user gesture needed
+        const cleanPoll = data.phone.replace(/\D/g, '')
+        const fullPoll  = `${data.countryCode}${cleanPoll}`
+        window.location.href = `https://wa.me/${fullPoll}${data.message ? `?text=${encodeURIComponent(data.message)}` : ''}`
+        // Overlay as fallback (visible for a split-second if universal link doesn't intercept)
         setWaOverlay({ phone: data.phone, countryCode: data.countryCode, message: data.message || '' })
       } catch {
         // ignore network errors
