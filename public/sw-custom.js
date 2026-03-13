@@ -1,6 +1,6 @@
 // Custom Service Worker for WA Quick
 // Handles push notifications and offline caching
-const SW_VERSION = '2.6.0'
+const SW_VERSION = '2.7.0'
 
 self.addEventListener('install', (event) => {
   self.skipWaiting()
@@ -63,9 +63,14 @@ self.addEventListener('notificationclick', (event) => {
 
   if (action === 'dismiss') return
 
-  // Build app URL with wa data as params so the page shows the overlay immediately,
-  // without waiting for the 1-second deeplink poll.
-  const fullPhone = (countryCode && phone) ? `${countryCode}${phone}` : ''
+  // 'send' action button: open WhatsApp directly — this was the original working behavior
+  const { waUrl } = event.notification.data
+  if (action === 'send' && waUrl) {
+    event.waitUntil(clients.openWindow(waUrl))
+    return
+  }
+
+  // Body tap: open app with deeplink params so overlay appears immediately
   const params = new URLSearchParams()
   params.set('tab', 'quick')
   if (phone)       params.set('phone', phone)
