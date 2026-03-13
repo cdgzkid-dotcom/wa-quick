@@ -1,6 +1,6 @@
 // Custom Service Worker for WA Quick
 // Handles push notifications and offline caching
-const SW_VERSION = '2.3.0'
+const SW_VERSION = '2.4.0'
 
 self.addEventListener('install', (event) => {
   self.skipWaiting()
@@ -63,22 +63,22 @@ self.addEventListener('notificationclick', (event) => {
 
   if (action === 'dismiss') return
 
-  // Strategy: open /api/go (same origin — allowed by iOS) which returns an HTML page
-  // that redirects to whatsapp://. WKWebView follows HTTP→custom-scheme redirects,
-  // so this chain gets us into WhatsApp directly from the notification tap.
+  // Build app URL with wa data as params so the page shows the overlay immediately,
+  // without waiting for the 1-second deeplink poll.
   const fullPhone = (countryCode && phone) ? `${countryCode}${phone}` : ''
-  const encodedText = message ? encodeURIComponent(message) : ''
-  const goUrl = fullPhone
-    ? `/api/go?phone=${encodeURIComponent(fullPhone)}${encodedText ? `&text=${encodedText}` : ''}`
-    : (url || '/')
+  const params = new URLSearchParams()
+  params.set('tab', 'quick')
+  if (phone)       params.set('phone', phone)
+  if (countryCode) params.set('countryCode', countryCode)
+  if (message)     params.set('message', message)
+  params.set('notif', '1')
+  const appUrl = `/?${params.toString()}`
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
       const appClient = windowClients.find((c) => c.url.startsWith(self.registration.scope))
-      if (appClient && appClient.navigate) {
-        return appClient.navigate(goUrl).catch(() => clients.openWindow(goUrl))
-      }
-      return clients.openWindow(goUrl)
+      if (appClient) return appClient.focus()
+      return clients.openWindow(appUrl)
     })
   )
 })
