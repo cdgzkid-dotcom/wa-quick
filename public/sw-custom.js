@@ -1,6 +1,6 @@
 // Custom Service Worker for WA Quick
 // Handles push notifications and offline caching
-const SW_VERSION = '2.8.0'
+const SW_VERSION = '2.9.0'
 
 self.addEventListener('install', (event) => {
   self.skipWaiting()
@@ -70,12 +70,27 @@ self.addEventListener('notificationclick', (event) => {
     return
   }
 
-  // Body tap → open/focus the app, deeplink polling will show the overlay
+  // Body tap → show overlay in the app
+  // Build the deep-link URL so a cold-start (app closed) can read params from useState
+  const params = new URLSearchParams()
+  if (phone)       params.set('phone', phone)
+  if (countryCode) params.set('countryCode', countryCode)
+  if (message)     params.set('message', message)
+  params.set('notif', '1')
+  const appUrl = '/?' + params.toString()
+
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
       const appClient = windowClients.find((c) => c.url.startsWith(self.registration.scope))
-      if (appClient) return appClient.focus()
-      return clients.openWindow('/')
+
+      if (appClient) {
+        // Warm start: app already open → post message so the listener in page.tsx shows overlay
+        appClient.postMessage({ type: 'DEEPLINK', phone, countryCode, message })
+        return appClient.focus()
+      }
+
+      // Cold start: app was closed → open with URL params so useState initialises overlay
+      return clients.openWindow(appUrl)
     })
   )
 })
