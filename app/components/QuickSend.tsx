@@ -36,16 +36,12 @@ type Props = {
   initialPhone?:       string
   initialMessage?:     string
   initialCountryCode?: string
-  notifReady?:         boolean
-  onSent?:             () => void
 }
 
 export default function QuickSend({
   initialPhone = '',
   initialMessage = '',
   initialCountryCode = '52',
-  notifReady = false,
-  onSent,
 }: Props) {
   const [countryCode, setCountryCode]       = useState('')
   const [phoneNumber, setPhoneNumber]       = useState('')
@@ -80,7 +76,6 @@ export default function QuickSend({
       return [contact, ...filtered].slice(0, 5)
     })
     window.open(waUrl, '_blank')
-    onSent?.()
 
     // Clear form after sending so old values don't persist on PWA resume
     setPhoneNumber('')
@@ -200,17 +195,6 @@ export default function QuickSend({
           className="input-field resize-none"
         />
       </div>
-
-      {/* ── Notif ready banner ── */}
-      {notifReady && (
-        <div
-          className="flex items-center gap-2 px-4 py-3 rounded-2xl text-sm font-medium"
-          style={{ background: '#25D366', color: '#fff' }}
-        >
-          <span style={{ fontSize: '18px' }}>⚡</span>
-          <span>Mensaje listo — toca <strong>Connect</strong> para enviarlo</span>
-        </div>
-      )}
 
       {/* ── Send button ── */}
       <button
