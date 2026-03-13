@@ -1,6 +1,6 @@
 // Custom Service Worker for WA Quick
 // Handles push notifications and offline caching
-const SW_VERSION = '2.7.0'
+const SW_VERSION = '2.8.0'
 
 self.addEventListener('install', (event) => {
   self.skipWaiting()
@@ -59,41 +59,23 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close()
 
   const { action } = event
-  const { url, phone, countryCode, message } = event.notification.data
+  const data = event.notification.data || {}
+  const { waUrl, phone, countryCode, message } = data
 
   if (action === 'dismiss') return
 
-  // 'send' action button: open WhatsApp directly — this was the original working behavior
-  const { waUrl } = event.notification.data
+  // 'send' action button → open WhatsApp directly
   if (action === 'send' && waUrl) {
     event.waitUntil(clients.openWindow(waUrl))
     return
   }
 
-  // Body tap: open app with deeplink params so overlay appears immediately
-  const params = new URLSearchParams()
-  params.set('tab', 'quick')
-  if (phone)       params.set('phone', phone)
-  if (countryCode) params.set('countryCode', countryCode)
-  if (message)     params.set('message', message)
-  params.set('notif', '1')
-  const appUrl = `/?${params.toString()}`
-
+  // Body tap → open/focus the app, deeplink polling will show the overlay
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
       const appClient = windowClients.find((c) => c.url.startsWith(self.registration.scope))
-      if (appClient) {
-        // Preserve ?debug=1 if the client already has it (for testing)
-        const clientUrl = new URL(appClient.url)
-        const finalUrl = clientUrl.searchParams.get('debug') === '1'
-          ? appUrl + '&debug=1'
-          : appUrl
-        if (typeof appClient.navigate === 'function') {
-          return appClient.navigate(finalUrl).catch(() => appClient.focus())
-        }
-        return appClient.focus()
-      }
-      return clients.openWindow(appUrl)
+      if (appClient) return appClient.focus()
+      return clients.openWindow('/')
     })
   )
 })
