@@ -1,6 +1,6 @@
 // Custom Service Worker for WA Quick
 // Handles push notifications and offline caching
-const SW_VERSION = '2.1.0'
+const SW_VERSION = '2.2.0'
 
 self.addEventListener('install', (event) => {
   self.skipWaiting()
@@ -63,18 +63,17 @@ self.addEventListener('notificationclick', (event) => {
 
   if (action === 'dismiss') return
 
-  // whatsapp:// deep link works on iOS from notification clicks (custom scheme)
-  // wa.me (https://) is blocked by iOS WebKit for clients.openWindow()
-  const fullPhone = (countryCode && phone) ? `${countryCode}${phone}` : ''
-  const encodedMsg = message ? encodeURIComponent(message) : ''
-  const waDeepLink = fullPhone
-    ? `whatsapp://send?phone=${fullPhone}${encodedMsg ? `&text=${encodedMsg}` : ''}`
-    : null
-
+  // iOS blocks clients.openWindow() for any external URL (https:// or whatsapp://).
+  // The only reliable approach: open/focus the app, let it detect the deeplink
+  // via server polling and show a pre-filled form ready to send.
   const appUrl = url || '/'
 
   event.waitUntil(
-    clients.openWindow(waDeepLink || appUrl).catch(() => clients.openWindow(appUrl))
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+      const appClient = windowClients.find((c) => c.url.startsWith(self.registration.scope))
+      if (appClient) return appClient.focus()
+      return clients.openWindow(appUrl)
+    })
   )
 })
 

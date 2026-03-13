@@ -34,6 +34,7 @@ function AppContent() {
     message:     initialMessage,
     countryCode: initialCountryCode,
   })
+  const [notifReady, setNotifReady] = useState(false)
 
   // Intercept console.log to show on-screen when ?debug=1
   useEffect(() => {
@@ -83,7 +84,9 @@ function AppContent() {
         if (!data || !data.phone || !data.countryCode) return
         setActiveTab('quick')
         setDeepLink({ phone: data.phone, countryCode: data.countryCode, message: data.message || '' })
-        window.location.href = `https://wa.me/${data.countryCode}${data.phone}?text=${encodeURIComponent(data.message || '')}`
+        setNotifReady(true)
+        // Note: window.location.href to external URL is blocked by iOS when called
+        // from async context. User must tap the send button (direct gesture).
       } catch {
         // ignore network errors
       }
@@ -122,6 +125,7 @@ function AppContent() {
       console.log('[deeplink] postMessage DEEPLINK → phone=%s | countryCode=%s | message=%s', phone, countryCode, message)
       setActiveTab('quick')
       setDeepLink({ phone, countryCode, message: message || '' })
+      setNotifReady(true)
     }
     navigator.serviceWorker?.addEventListener('message', handler)
     return () => navigator.serviceWorker?.removeEventListener('message', handler)
@@ -201,6 +205,8 @@ function AppContent() {
             initialPhone={deepLink.phone}
             initialMessage={deepLink.message}
             initialCountryCode={deepLink.countryCode}
+            notifReady={notifReady}
+            onSent={() => setNotifReady(false)}
           />
         )}
         {activeTab === 'schedule'  && <ScheduleMessage onScheduled={handleScheduled} sessionId={sessionId} />}
