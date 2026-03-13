@@ -1,6 +1,6 @@
 // Custom Service Worker for WA Quick
 // Handles push notifications and offline caching
-const SW_VERSION = '2.5.0'
+const SW_VERSION = '2.6.0'
 
 self.addEventListener('install', (event) => {
   self.skipWaiting()
@@ -78,9 +78,13 @@ self.addEventListener('notificationclick', (event) => {
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
       const appClient = windowClients.find((c) => c.url.startsWith(self.registration.scope))
       if (appClient) {
-        // navigate() passes URL params so the page auto-redirects to WhatsApp
+        // Preserve ?debug=1 if the client already has it (for testing)
+        const clientUrl = new URL(appClient.url)
+        const finalUrl = clientUrl.searchParams.get('debug') === '1'
+          ? appUrl + '&debug=1'
+          : appUrl
         if (typeof appClient.navigate === 'function') {
-          return appClient.navigate(appUrl).catch(() => appClient.focus())
+          return appClient.navigate(finalUrl).catch(() => appClient.focus())
         }
         return appClient.focus()
       }
