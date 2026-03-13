@@ -36,10 +36,18 @@ function AppContent() {
     countryCode: initialCountryCode,
   })
 
-  // WhatsApp overlay — shown when app is opened from a notification (fallback if auto-redirect fails)
+  // WhatsApp overlay — shown when app is opened from a notification
   const [waOverlay, setWaOverlay] = useState<DeepLink | null>(
     fromNotif && initialPhone ? { phone: initialPhone, message: initialMessage, countryCode: initialCountryCode } : null
   )
+
+  // When SW calls navigate(appUrl) on a mounted page, useState initial value won't re-run.
+  // This effect catches URL param changes (soft navigation) and shows the overlay.
+  useEffect(() => {
+    if (fromNotif && initialPhone) {
+      setWaOverlay({ phone: initialPhone, message: initialMessage, countryCode: initialCountryCode })
+    }
+  }, [fromNotif, initialPhone, initialMessage, initialCountryCode])
 
   // Intercept console.log to show on-screen when ?debug=1
   useEffect(() => {
