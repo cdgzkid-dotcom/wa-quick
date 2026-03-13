@@ -1,6 +1,6 @@
 const withPWA = require('next-pwa')({
   dest: 'public',
-  register: true,
+  register: false,  // sw-custom.js is registered manually in page.tsx — prevents two SWs competing
   skipWaiting: true,
   disable: process.env.NODE_ENV === 'development',
   customWorkerDir: 'worker',
