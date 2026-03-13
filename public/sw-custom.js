@@ -1,6 +1,6 @@
 // Custom Service Worker for WA Quick
 // Handles push notifications and offline caching
-const SW_VERSION = '2.9.0'
+const SW_VERSION = '3.0.0'
 
 self.addEventListener('install', (event) => {
   self.skipWaiting()
@@ -60,39 +60,12 @@ self.addEventListener('notificationclick', (event) => {
 
   const { action } = event
   const data = event.notification.data || {}
-  const { waUrl, phone, countryCode, message } = data
+  const { waUrl, url, phone, countryCode, message } = data
 
   if (action === 'dismiss') return
 
-  // 'send' action button → open WhatsApp directly
-  if (action === 'send' && waUrl) {
-    event.waitUntil(clients.openWindow(waUrl))
-    return
-  }
-
-  // Body tap → show overlay in the app
-  // Build the deep-link URL so a cold-start (app closed) can read params from useState
-  const params = new URLSearchParams()
-  if (phone)       params.set('phone', phone)
-  if (countryCode) params.set('countryCode', countryCode)
-  if (message)     params.set('message', message)
-  params.set('notif', '1')
-  const appUrl = '/?' + params.toString()
-
-  event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
-      const appClient = windowClients.find((c) => c.url.startsWith(self.registration.scope))
-
-      if (appClient) {
-        // Warm start: app already open → post message so the listener in page.tsx shows overlay
-        appClient.postMessage({ type: 'DEEPLINK', phone, countryCode, message })
-        return appClient.focus()
-      }
-
-      // Cold start: app was closed → open with URL params so useState initialises overlay
-      return clients.openWindow(appUrl)
-    })
-  )
+  // 'send' button OR body tap → open WhatsApp directly (same behaviour)
+  event.waitUntil(clients.openWindow(waUrl || url || '/'))
 })
 
 // Background sync for offline support
