@@ -1,6 +1,6 @@
 // Custom Service Worker for WA Quick
 // Handles push notifications and offline caching
-const SW_VERSION = '3.1.0'
+const SW_VERSION = '3.2.0'
 
 self.addEventListener('install', (event) => {
   self.skipWaiting()
@@ -59,27 +59,22 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close()
 
   const { action } = event
-  const data = event.notification.data || {}
-  const { waUrl, url, phone, countryCode, message } = data
+  const { url, phone, countryCode, message } = event.notification.data
 
   if (action === 'dismiss') return
 
-  // 'send' action button — open WhatsApp via custom scheme (works on iOS)
-  if (action === 'send') {
-    const whatsappUrl = phone
-      ? `whatsapp://send?phone=${encodeURIComponent((data.countryCode || '52') + phone.replace(/\D/g, ''))}&text=${encodeURIComponent(data.message || '')}`
-      : (waUrl || url || '/')
-    event.waitUntil(clients.openWindow(whatsappUrl))
-    return
-  }
+  // whatsapp:// deep link works on iOS from notification clicks (custom scheme)
+  // wa.me (https://) is blocked by iOS WebKit for clients.openWindow()
+  const fullPhone = (countryCode && phone) ? `${countryCode}${phone}` : ''
+  const encodedMsg = message ? encodeURIComponent(message) : ''
+  const waDeepLink = fullPhone
+    ? `whatsapp://send?phone=${fullPhone}${encodedMsg ? `&text=${encodedMsg}` : ''}`
+    : null
 
-  // Body tap — focus/open the app so visibilitychange fires and server poll picks up the deeplink
+  const appUrl = url || '/'
+
   event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
-      const appClient = windowClients.find((c) => c.url.startsWith(self.registration.scope))
-      if (appClient) return appClient.focus()
-      return clients.openWindow('/')
-    })
+    clients.openWindow(waDeepLink || appUrl).catch(() => clients.openWindow(appUrl))
   )
 })
 
