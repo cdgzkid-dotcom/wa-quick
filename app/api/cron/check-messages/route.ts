@@ -82,6 +82,15 @@ export async function GET(request: NextRequest) {
         waUrl,
       }
 
+      // Create deeplink BEFORE sending push so it exists when the notification is tapped,
+      // even if Vercel cuts the function short after the push is sent.
+      const deepLinkDoc = await PendingDeepLink.create({
+        phone,
+        countryCode: cc,
+        message: msg.message || '',
+        used: false,
+      })
+
       let atLeastOneSent = false
       for (const sub of subscriptions) {
         const result = await sendPushNotification(sub, payload)
@@ -92,13 +101,9 @@ export async function GET(request: NextRequest) {
         }
       }
 
-      if (atLeastOneSent) {
-        await PendingDeepLink.create({
-          phone,
-          countryCode: cc,
-          message: msg.message || '',
-          used: false,
-        })
+      // If no subscription accepted the push, clean up the deeplink to avoid ghost docs
+      if (!atLeastOneSent) {
+        await PendingDeepLink.deleteOne({ _id: deepLinkDoc._id })
       }
 
       notifiedCount++
