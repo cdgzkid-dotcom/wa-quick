@@ -95,9 +95,15 @@ function AppContent() {
         const data = await res.json()
         console.log('[deeplink] response:', data)
         if (!data || !data.phone || !data.countryCode) return
+        const cleanPhone = data.phone.replace(/\D/g, '')
+        const fullPhone = `${data.countryCode}${cleanPhone}`
         setActiveTab('quick')
         setDeepLink({ phone: data.phone, countryCode: data.countryCode, message: data.message || '' })
-        setWaOverlay({ phone: data.phone, countryCode: data.countryCode, message: data.message || '' })
+        // Try whatsapp:// scheme first — opens WhatsApp directly on iOS without needing user tap
+        const whatsappUrl = `whatsapp://send?phone=${fullPhone}&text=${encodeURIComponent(data.message || '')}`
+        window.location.href = whatsappUrl
+        // Show overlay as fallback (if whatsapp:// was blocked or took too long, user can tap)
+        setTimeout(() => setWaOverlay({ phone: data.phone, countryCode: data.countryCode, message: data.message || '' }), 500)
       } catch {
         // ignore network errors
       }

@@ -1,6 +1,6 @@
 // Custom Service Worker for WA Quick
 // Handles push notifications and offline caching
-const SW_VERSION = '3.0.0'
+const SW_VERSION = '3.1.0'
 
 self.addEventListener('install', (event) => {
   self.skipWaiting()
@@ -64,8 +64,23 @@ self.addEventListener('notificationclick', (event) => {
 
   if (action === 'dismiss') return
 
-  // 'send' button OR body tap → open WhatsApp directly (same behaviour)
-  event.waitUntil(clients.openWindow(waUrl || url || '/'))
+  // 'send' action button — open WhatsApp via custom scheme (works on iOS)
+  if (action === 'send') {
+    const whatsappUrl = phone
+      ? `whatsapp://send?phone=${encodeURIComponent((data.countryCode || '52') + phone.replace(/\D/g, ''))}&text=${encodeURIComponent(data.message || '')}`
+      : (waUrl || url || '/')
+    event.waitUntil(clients.openWindow(whatsappUrl))
+    return
+  }
+
+  // Body tap — focus/open the app so visibilitychange fires and server poll picks up the deeplink
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+      const appClient = windowClients.find((c) => c.url.startsWith(self.registration.scope))
+      if (appClient) return appClient.focus()
+      return clients.openWindow('/')
+    })
+  )
 })
 
 // Background sync for offline support
