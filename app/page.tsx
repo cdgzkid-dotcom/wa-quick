@@ -28,7 +28,10 @@ function AppContent() {
   const [debugLogs, setDebugLogs]   = useState<string[]>([])
   const debugMode = searchParams.get('debug') === '1'
 
-  // Deep-link state — starts from URL params, updated via postMessage from SW
+  // WhatsApp overlay shown when server poll detects a pending deeplink
+  const [waOverlay, setWaOverlay] = useState<DeepLink | null>(null)
+
+  // Deep-link state — starts from URL params, updated via server polling
   const [deepLink, setDeepLink] = useState<DeepLink>({
     phone:       initialPhone,
     message:     initialMessage,
@@ -81,9 +84,14 @@ function AppContent() {
         const data = await res.json()
         console.log('[deeplink] response:', data)
         if (!data || !data.phone || !data.countryCode) return
+        const fullPhone = `${data.countryCode}${data.phone.replace(/\D/g, '')}`
+        const waUrl = `https://wa.me/${fullPhone}${data.message ? `?text=${encodeURIComponent(data.message)}` : ''}`
         setActiveTab('quick')
         setDeepLink({ phone: data.phone, countryCode: data.countryCode, message: data.message || '' })
-        window.location.href = `https://wa.me/${data.countryCode}${data.phone}?text=${encodeURIComponent(data.message || '')}`
+        // Attempt direct open (works if iOS passes user-activation from notification tap → visibilitychange)
+        window.open(waUrl, '_blank')
+        // Always show overlay as tap-once fallback
+        setWaOverlay({ phone: data.phone, countryCode: data.countryCode, message: data.message || '' })
       } catch {
         // ignore network errors
       }
@@ -127,6 +135,15 @@ function AppContent() {
     return () => navigator.serviceWorker?.removeEventListener('message', handler)
   }, [])
 
+  const handleWaOverlaySend = () => {
+    if (!waOverlay) return
+    const fullPhone = `${waOverlay.countryCode}${waOverlay.phone.replace(/\D/g, '')}`
+    const waUrl = `https://wa.me/${fullPhone}${waOverlay.message ? `?text=${encodeURIComponent(waOverlay.message)}` : ''}`
+    window.open(waUrl, '_blank')
+    setWaOverlay(null)
+    router.replace('/', { scroll: false })
+  }
+
   const handleTabChange = (tab: Tab) => {
     setActiveTab(tab)
     router.replace(`/?tab=${tab}`, { scroll: false })
@@ -147,6 +164,34 @@ function AppContent() {
 
   return (
     <div className="min-h-screen flex flex-col">
+
+      {/* WhatsApp overlay — shown when a scheduled message is ready to send */}
+      {waOverlay && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center px-6 text-center"
+          style={{ background: '#075E54' }}>
+          <div style={{ fontSize: 64, marginBottom: 8 }}>💬</div>
+          <p style={{ color: '#fff', fontWeight: 700, fontSize: 20, marginBottom: 8 }}>
+            Mensaje listo para enviar
+          </p>
+          <p style={{ color: '#a7f3d0', fontSize: 15, marginBottom: 8 }}>
+            +{waOverlay.countryCode}{waOverlay.phone}
+          </p>
+          {waOverlay.message && (
+            <p style={{ color: '#d1fae5', fontSize: 14, marginBottom: 32, background: 'rgba(255,255,255,0.1)', padding: '10px 16px', borderRadius: 12, maxWidth: 320, wordBreak: 'break-word' }}>
+              &ldquo;{waOverlay.message}&rdquo;
+            </p>
+          )}
+          <button onClick={handleWaOverlaySend}
+            style={{ background: '#25D366', color: '#fff', border: 'none', borderRadius: 14, padding: '18px 40px', fontSize: 18, fontWeight: 700, cursor: 'pointer', marginBottom: 8 }}>
+            Abrir WhatsApp
+          </button>
+          <button onClick={() => setWaOverlay(null)}
+            style={{ color: '#a7f3d0', background: 'none', border: 'none', fontSize: 14, cursor: 'pointer', padding: '8px' }}>
+            Cancelar
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <header
         className="safe-top sticky top-0 z-30"
