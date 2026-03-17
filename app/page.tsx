@@ -103,13 +103,8 @@ function AppContent() {
         const data = await res.json()
         console.log('[deeplink] response:', data)
         if (!data || !data.phone || !data.countryCode) return
-        const fullPhone = `${data.countryCode}${data.phone.replace(/\D/g, '')}`
-        const waUrl = `https://wa.me/${fullPhone}${data.message ? `?text=${encodeURIComponent(data.message)}` : ''}`
         setActiveTab('quick')
         setDeepLink({ phone: data.phone, countryCode: data.countryCode, message: data.message || '' })
-        // Attempt direct open (works if iOS passes user-activation from notification tap → visibilitychange)
-        window.open(waUrl, '_blank')
-        // Always show overlay as tap-once fallback
         setWaOverlay({ phone: data.phone, countryCode: data.countryCode, message: data.message || '' })
       } catch {
         // ignore network errors

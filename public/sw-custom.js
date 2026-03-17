@@ -1,6 +1,6 @@
 // Custom Service Worker for WA Quick
 // Handles push notifications and offline caching
-const SW_VERSION = '3.4.0'
+const SW_VERSION = '3.5.0'
 
 self.addEventListener('install', (event) => {
   self.skipWaiting()
@@ -74,11 +74,8 @@ self.addEventListener('notificationclick', (event) => {
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
       const appClient = windowClients.find((c) => c.url.startsWith(self.registration.scope))
-      if (appClient) {
-        // Warm start: navigate existing window to URL with params, overlay shows via useEffect
-        return appClient.navigate(appUrl).catch(() => appClient.focus())
-      }
-      // Cold start: open new window — page reads params from useState/useEffect
+        // openWindow() is more reliable than navigate() on iOS PWA —
+      // same-origin URL within SW scope always opens/navigates the PWA
       return clients.openWindow(appUrl)
     })
   )
