@@ -91,17 +91,15 @@ function AppContent() {
     return () => clearInterval(cronInterval)
   }, [])
 
-  // Deep-link via server polling: every 3 s (only when tab is visible).
-  // The cron saves a PendingDeepLink doc when it sends a push; we consume it here.
-  // Polling is more reliable on iOS than focus/visibilitychange events.
+  // Deep-link via server polling every second.
+  // No visibilityState check — iOS suspends JS in background so when timers
+  // resume after focus() the state may not yet read 'visible'. Safe to always
+  // poll since iOS naturally throttles background execution.
   useEffect(() => {
     const poll = async () => {
-      if (document.visibilityState !== 'visible') return
-      console.log('[deeplink] fetching /api/deeplink')
       try {
         const res = await fetch('/api/deeplink')
         const data = await res.json()
-        console.log('[deeplink] response:', data)
         if (!data || !data.phone || !data.countryCode) return
         setActiveTab('quick')
         setDeepLink({ phone: data.phone, countryCode: data.countryCode, message: data.message || '' })
@@ -111,32 +109,20 @@ function AppContent() {
       }
     }
 
-    // Poll immediately on mount
     poll()
-
     const interval = setInterval(poll, 1000)
 
-    // Also poll immediately when the tab becomes visible (e.g. user opens app from notification)
-    // Retry with delays to cover iOS cases where the app takes time to become visible
-    const onVisibility = () => {
-      if (document.visibilityState !== 'visible') return
-      poll()
-      setTimeout(poll, 500)
-      setTimeout(poll, 1000)
-      setTimeout(poll, 2000)
-      setTimeout(poll, 3000)
-    }
-    document.addEventListener('visibilitychange', onVisibility)
-    // 'focus' fires more reliably than visibilitychange on some iOS versions
-    window.addEventListener('focus', onVisibility)
-    // pageshow fires on back/forward cache restore
-    window.addEventListener('pageshow', onVisibility)
+    // Burst-poll on any foreground event for fastest possible response
+    const onFocus = () => { poll(); setTimeout(poll, 500); setTimeout(poll, 1500) }
+    document.addEventListener('visibilitychange', onFocus)
+    window.addEventListener('focus', onFocus)
+    window.addEventListener('pageshow', onFocus)
 
     return () => {
       clearInterval(interval)
-      document.removeEventListener('visibilitychange', onVisibility)
-      window.removeEventListener('focus', onVisibility)
-      window.removeEventListener('pageshow', onVisibility)
+      document.removeEventListener('visibilitychange', onFocus)
+      window.removeEventListener('focus', onFocus)
+      window.removeEventListener('pageshow', onFocus)
     }
   }, [])
 

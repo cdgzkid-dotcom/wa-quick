@@ -1,6 +1,6 @@
 // Custom Service Worker for WA Quick
 // Handles push notifications and offline caching
-const SW_VERSION = '3.5.0'
+const SW_VERSION = '3.6.0'
 
 self.addEventListener('install', (event) => {
   self.skipWaiting()
@@ -74,8 +74,13 @@ self.addEventListener('notificationclick', (event) => {
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
       const appClient = windowClients.find((c) => c.url.startsWith(self.registration.scope))
-        // openWindow() is more reliable than navigate() on iOS PWA —
-      // same-origin URL within SW scope always opens/navigates the PWA
+      if (appClient) {
+        // Existing PWA window found: focus it so visibilitychange fires in page.tsx
+        // which triggers the deeplink poll. openWindow() on an existing client
+        // can open a Safari tab that consumes the deeplink before the PWA sees it.
+        return appClient.focus()
+      }
+      // No existing window: open the PWA fresh with deeplink params in URL
       return clients.openWindow(appUrl)
     })
   )
