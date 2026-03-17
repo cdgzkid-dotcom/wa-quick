@@ -136,6 +136,7 @@ function AppContent() {
       console.log('[deeplink] postMessage DEEPLINK → phone=%s | countryCode=%s | message=%s', phone, countryCode, message)
       setActiveTab('quick')
       setDeepLink({ phone, countryCode, message: message || '' })
+      setWaOverlay({ phone, countryCode, message: message || '' })
     }
     navigator.serviceWorker?.addEventListener('message', handler)
     return () => navigator.serviceWorker?.removeEventListener('message', handler)
