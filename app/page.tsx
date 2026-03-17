@@ -190,7 +190,7 @@ function AppContent() {
           />
         )}
         {activeTab === 'schedule'  && <ScheduleMessage onScheduled={handleScheduled} sessionId={sessionId} />}
-        {activeTab === 'scheduled' && <ScheduledList refreshKey={refreshKey} deepLink={deepLink.phone ? deepLink : undefined} onClearDeepLink={clearDeepLink} />}
+        {activeTab === 'scheduled' && <ScheduledList refreshKey={refreshKey} fromDeepLink={!!deepLink.phone} />}
       </main>
 
       {/* Debug log panel — only shown when ?debug=1 */}
