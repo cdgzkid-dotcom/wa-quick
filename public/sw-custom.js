@@ -1,6 +1,6 @@
 // Custom Service Worker for WA Quick
 // Handles push notifications and offline caching
-const SW_VERSION = '3.7.0'
+const SW_VERSION = '3.8.0'
 
 self.addEventListener('install', (event) => {
   self.skipWaiting()
@@ -59,34 +59,27 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close()
 
   const { action } = event
-  const { url, phone, countryCode, message } = event.notification.data
+  const { waUrl, url } = event.notification.data
+
+  // 'Enviar ahora' action button — open WhatsApp directly from notification
+  // This runs in notificationclick user-gesture context so openWindow works instantly
+  if (action === 'send' && waUrl) {
+    event.waitUntil(clients.openWindow(waUrl))
+    return
+  }
 
   if (action === 'dismiss') return
 
-  // Build app URL with deeplink params so page.tsx can show overlay without polling
-  const params = new URLSearchParams()
-  if (phone)       params.set('phone', phone)
-  if (countryCode) params.set('countryCode', countryCode)
-  if (message)     params.set('message', message)
-  params.set('notif', '1')
-  const appUrl = '/?' + params.toString()
-
+  // Body tap — bring existing PWA to focus (poll in page.tsx will navigate to WhatsApp)
+  // If PWA is not running, open WhatsApp directly
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
       const appClient = windowClients.find((c) => c.url.startsWith(self.registration.scope))
       if (appClient) {
-        // Navigate existing PWA window to deep-link URL so page.tsx reads params directly
-        // via useState / useEffect — no polling race needed for the overlay.
-        // Fall back to focus() if navigate() is unsupported or rejected.
-        if (typeof appClient.navigate === 'function') {
-          return appClient.navigate(appUrl)
-            .then((c) => (c || appClient).focus())
-            .catch(() => appClient.focus())
-        }
         return appClient.focus()
       }
-      // No existing window: open the PWA fresh with deeplink params in URL
-      return clients.openWindow(appUrl)
+      // No PWA running: open WhatsApp URL directly
+      return clients.openWindow(waUrl || url || '/')
     })
   )
 })

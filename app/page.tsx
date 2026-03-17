@@ -92,18 +92,20 @@ function AppContent() {
   }, [])
 
   // Deep-link via server polling every second.
-  // No visibilityState check — iOS suspends JS in background so when timers
-  // resume after focus() the state may not yet read 'visible'. Safe to always
-  // poll since iOS naturally throttles background execution.
+  // Only runs when tab is visible — matches the stable-v1 behavior that was working.
   useEffect(() => {
     const poll = async () => {
+      if (document.visibilityState !== 'visible') return
       try {
         const res = await fetch('/api/deeplink')
         const data = await res.json()
         if (!data || !data.phone || !data.countryCode) return
         setActiveTab('quick')
         setDeepLink({ phone: data.phone, countryCode: data.countryCode, message: data.message || '' })
-        setWaOverlay({ phone: data.phone, countryCode: data.countryCode, message: data.message || '' })
+        // Navigate directly to WhatsApp — iOS universal link opens the app instantly.
+        // This is the same approach used in stable-v1 (13c985f) that was working.
+        const fullPhone = `${data.countryCode}${data.phone}`
+        window.location.href = `https://wa.me/${fullPhone}${data.message ? `?text=${encodeURIComponent(data.message)}` : ''}`
       } catch {
         // ignore network errors
       }
@@ -112,17 +114,20 @@ function AppContent() {
     poll()
     const interval = setInterval(poll, 1000)
 
-    // Burst-poll on any foreground event for fastest possible response
-    const onFocus = () => { poll(); setTimeout(poll, 500); setTimeout(poll, 1500) }
-    document.addEventListener('visibilitychange', onFocus)
-    window.addEventListener('focus', onFocus)
-    window.addEventListener('pageshow', onFocus)
+    // Poll immediately (+ retries) whenever app becomes visible after being backgrounded
+    const onVisibility = () => {
+      if (document.visibilityState !== 'visible') return
+      poll()
+      setTimeout(poll, 500)
+      setTimeout(poll, 1000)
+      setTimeout(poll, 2000)
+      setTimeout(poll, 3000)
+    }
+    document.addEventListener('visibilitychange', onVisibility)
 
     return () => {
       clearInterval(interval)
-      document.removeEventListener('visibilitychange', onFocus)
-      window.removeEventListener('focus', onFocus)
-      window.removeEventListener('pageshow', onFocus)
+      document.removeEventListener('visibilitychange', onVisibility)
     }
   }, [])
 
