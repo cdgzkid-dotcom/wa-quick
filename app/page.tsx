@@ -15,7 +15,8 @@ function AppContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
 
-  // Initial values from URL params (app launched from notification while closed)
+  // URL params set by SW when notification is tapped
+  const fromNotif          = searchParams.get('notif') === '1'
   const initialPhone       = searchParams.get('phone')       || ''
   const initialMessage     = searchParams.get('message')     || ''
   const initialCountryCode = searchParams.get('countryCode') || '52'
@@ -28,8 +29,18 @@ function AppContent() {
   const [debugLogs, setDebugLogs]   = useState<string[]>([])
   const debugMode = searchParams.get('debug') === '1'
 
-  // WhatsApp overlay shown when server poll detects a pending deeplink
-  const [waOverlay, setWaOverlay] = useState<DeepLink | null>(null)
+  // WhatsApp overlay — shown from URL params (SW navigate) OR from server poll
+  const [waOverlay, setWaOverlay] = useState<DeepLink | null>(
+    fromNotif && initialPhone ? { phone: initialPhone, message: initialMessage, countryCode: initialCountryCode } : null
+  )
+
+  // SW calls appClient.navigate('/?notif=1&phone=...') — component is already mounted so
+  // useState initial value won't re-run; this useEffect catches the URL change instead.
+  useEffect(() => {
+    if (fromNotif && initialPhone) {
+      setWaOverlay({ phone: initialPhone, message: initialMessage, countryCode: initialCountryCode })
+    }
+  }, [fromNotif, initialPhone, initialMessage, initialCountryCode])
 
   // Deep-link state — starts from URL params, updated via server polling
   const [deepLink, setDeepLink] = useState<DeepLink>({
