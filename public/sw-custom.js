@@ -84,6 +84,13 @@ self.addEventListener('notificationclick', (event) => {
   )
 })
 
+// Respond to version queries from page.tsx
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'GET_VERSION') {
+    event.source?.postMessage({ type: 'SW_VERSION', version: SW_VERSION })
+  }
+})
+
 // Background sync for offline support
 self.addEventListener('sync', (event) => {
   if (event.tag === 'check-messages') {

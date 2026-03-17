@@ -27,6 +27,7 @@ function AppContent() {
   const [showSuccess, setShowSuccess] = useState(false)
   const [sessionId, setSessionId]   = useState('')
   const [debugLogs, setDebugLogs]   = useState<string[]>([])
+  const [swVersion, setSwVersion]   = useState('')
   const debugMode = searchParams.get('debug') === '1'
 
   // WhatsApp overlay — shown from URL params (SW navigate) OR from server poll
@@ -70,9 +71,16 @@ function AppContent() {
     }
     setSessionId(id)
 
-    // Register service worker
+    // Register service worker and report its version
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw-custom.js').catch(console.error)
+      // Ask active SW for its version
+      navigator.serviceWorker.ready.then((reg) => {
+        reg.active?.postMessage({ type: 'GET_VERSION' })
+      })
+      navigator.serviceWorker.addEventListener('message', (e) => {
+        if (e.data?.type === 'SW_VERSION') setSwVersion(e.data.version)
+      })
     }
 
     // Client-side cron fallback (every minute)
@@ -124,10 +132,16 @@ function AppContent() {
       setTimeout(poll, 3000)
     }
     document.addEventListener('visibilitychange', onVisibility)
+    // 'focus' fires more reliably than visibilitychange on some iOS versions
+    window.addEventListener('focus', onVisibility)
+    // pageshow fires on back/forward cache restore
+    window.addEventListener('pageshow', onVisibility)
 
     return () => {
       clearInterval(interval)
       document.removeEventListener('visibilitychange', onVisibility)
+      window.removeEventListener('focus', onVisibility)
+      window.removeEventListener('pageshow', onVisibility)
     }
   }, [])
 
@@ -276,7 +290,7 @@ function AppContent() {
       )}
 
       {/* Footer */}
-      <div className="text-center pb-3 pt-1">
+      <div className="text-center pb-3 pt-1 space-y-1">
         <a
           href="https://wa.quick.sellia.ai/politica-de-privacidad.html"
           target="_blank"
@@ -286,6 +300,9 @@ function AppContent() {
         >
           Política de Privacidad
         </a>
+        {swVersion && (
+          <p className="text-xs" style={{ color: 'var(--text-dim)' }}>SW {swVersion}</p>
+        )}
       </div>
 
       {/* Bottom safe area */}
