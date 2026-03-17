@@ -2,41 +2,20 @@ import { NextResponse } from 'next/server'
 import { connectDB } from '@/app/lib/mongoose'
 import PendingDeepLink from '@/app/lib/models/PendingDeepLink'
 
+// GET — peek only, does NOT mark as used.
+// The poll can read the deeplink as many times as needed without consuming it.
+// The deeplink is only consumed when the user explicitly acts on it (PATCH).
 export async function GET() {
   try {
     await connectDB()
 
-    const totalCount = await PendingDeepLink.countDocuments()
-    const latest = await PendingDeepLink.findOne().sort({ createdAt: -1 }).lean()
-
-    console.log('[deeplink] total docs in collection:', totalCount)
-    if (latest) {
-      console.log('[deeplink] most recent doc → phone=%s | used=%s | createdAt=%s',
-        latest.phone, latest.used, latest.createdAt)
-    } else {
-      console.log('[deeplink] collection is empty')
-    }
-
-    const doc = await PendingDeepLink.findOneAndUpdate(
+    const doc = await PendingDeepLink.findOne(
       { createdAt: { $gte: new Date(Date.now() - 3 * 60 * 1000) }, used: false },
-      { used: true },
-      { sort: { createdAt: -1 }, new: false }
+      null,
+      { sort: { createdAt: -1 } }
     ).lean()
 
-    if (!doc) {
-      if (latest && latest.used) {
-        console.log('[deeplink] no result: most recent doc is already used=true')
-      } else if (latest && latest.createdAt < new Date(Date.now() - 3 * 60 * 1000)) {
-        console.log('[deeplink] no result: most recent doc is older than 3 minutes (createdAt=%s)',
-          latest.createdAt)
-      } else {
-        console.log('[deeplink] no result: no unused docs within 3 minutes')
-      }
-      return NextResponse.json(null)
-    }
-
-    console.log('[deeplink] returning → phone=%s | countryCode=%s | message=%s',
-      doc.phone, doc.countryCode, doc.message)
+    if (!doc) return NextResponse.json(null)
 
     return NextResponse.json({
       phone:       doc.phone,
@@ -44,7 +23,24 @@ export async function GET() {
       message:     doc.message,
     })
   } catch (error) {
-    console.error('[deeplink] error:', error)
+    console.error('[deeplink] GET error:', error)
     return NextResponse.json(null)
+  }
+}
+
+// PATCH — mark the most recent unused deeplink as used.
+// Called when the user taps "Abrir WhatsApp" or "Cancelar" in the card.
+export async function PATCH() {
+  try {
+    await connectDB()
+    await PendingDeepLink.findOneAndUpdate(
+      { createdAt: { $gte: new Date(Date.now() - 3 * 60 * 1000) }, used: false },
+      { used: true },
+      { sort: { createdAt: -1 } }
+    )
+    return NextResponse.json({ ok: true })
+  } catch (error) {
+    console.error('[deeplink] PATCH error:', error)
+    return NextResponse.json({ ok: false })
   }
 }

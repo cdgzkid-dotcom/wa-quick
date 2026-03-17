@@ -216,6 +216,7 @@ function AppContent() {
             )}
             <button
               onClick={() => {
+                fetch('/api/deeplink', { method: 'PATCH' }).catch(() => {})
                 window.open(deepLinkWaUrl, '_blank')
                 clearDeepLink()
               }}
@@ -224,7 +225,10 @@ function AppContent() {
               Abrir WhatsApp
             </button>
             <button
-              onClick={clearDeepLink}
+              onClick={() => {
+                fetch('/api/deeplink', { method: 'PATCH' }).catch(() => {})
+                clearDeepLink()
+              }}
               style={{ color: '#a7f3d0', background: 'none', border: 'none', fontSize: 13, cursor: 'pointer', padding: 4 }}
             >
               Cancelar
