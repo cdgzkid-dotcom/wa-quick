@@ -1,6 +1,6 @@
 // Custom Service Worker for WA Quick
 // Handles push notifications and offline caching
-const SW_VERSION = '3.12.0'
+const SW_VERSION = '3.13.0'
 
 self.addEventListener('install', (event) => {
   self.skipWaiting()
