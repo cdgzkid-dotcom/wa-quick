@@ -44,20 +44,14 @@ function getTimeUntil(dateStr: string) {
   return `en ${minutes}m`
 }
 
-export default function ScheduledList({
-  refreshKey,
-  fromDeepLink,
-}: {
-  refreshKey: number
-  fromDeepLink?: boolean
-}) {
+export default function ScheduledList({ refreshKey }: { refreshKey: number }) {
   const [messages, setMessages] = useState<ScheduledMessage[]>([])
   const [loading, setLoading] = useState(true)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [deletingAll, setDeletingAll] = useState(false)
   const [editing, setEditing] = useState<EditingState | null>(null)
   const [savingEdit, setSavingEdit] = useState(false)
-  const [filter, setFilter] = useState<'pending' | 'sent' | 'all'>(fromDeepLink ? 'all' : 'pending')
+  const [filter, setFilter] = useState<'pending' | 'sent' | 'all'>('pending')
 
   const fetchMessages = useCallback(async () => {
     try {
@@ -101,6 +95,8 @@ export default function ScheduledList({
   const handleSendNow = (msg: ScheduledMessage) => {
     const fullPhone = `${msg.countryCode}${msg.phoneNumber}`
     const waUrl = `https://wa.me/${fullPhone}${msg.message ? `?text=${encodeURIComponent(msg.message)}` : ''}`
+    fetch(`/api/messages/${msg.id}`, { method: 'PATCH' }).catch(() => {})
+    setMessages((prev) => prev.map((m) => m.id === msg.id ? { ...m, sent: true } : m))
     window.open(waUrl, '_blank')
   }
 

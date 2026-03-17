@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     while (true) {
       const claimed = await ScheduledMessage.findOneAndUpdate(
         { sent: false, notified: false, scheduledAt: { $gte: twoMinutesAgo, $lte: now } },
-        { notified: true, sent: true },
+        { notified: true },
         { new: false }
       ).lean()
       if (!claimed) break

@@ -23,6 +23,21 @@ export async function DELETE(
   }
 }
 
+export async function PATCH(
+  _request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const { id } = params
+    await connectDB()
+    await ScheduledMessage.findByIdAndUpdate(id, { sent: true })
+    return NextResponse.json({ ok: true })
+  } catch (error) {
+    console.error('Error marking message sent:', error)
+    return NextResponse.json({ ok: false }, { status: 500 })
+  }
+}
+
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
