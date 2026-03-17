@@ -15,8 +15,6 @@ function AppContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
 
-  // URL params set by SW when notification is tapped
-  const fromNotif          = searchParams.get('notif') === '1'
   const initialPhone       = searchParams.get('phone')       || ''
   const initialMessage     = searchParams.get('message')     || ''
   const initialCountryCode = searchParams.get('countryCode') || '52'
@@ -30,25 +28,15 @@ function AppContent() {
   const [swVersion, setSwVersion]   = useState('')
   const debugMode = searchParams.get('debug') === '1'
 
-  // WhatsApp overlay — shown from URL params (SW navigate) OR from server poll
-  const [waOverlay, setWaOverlay] = useState<DeepLink | null>(
-    fromNotif && initialPhone ? { phone: initialPhone, message: initialMessage, countryCode: initialCountryCode } : null
-  )
-
-  // SW calls appClient.navigate('/?notif=1&phone=...') — component is already mounted so
-  // useState initial value won't re-run; this useEffect catches the URL change instead.
-  useEffect(() => {
-    if (fromNotif && initialPhone) {
-      setWaOverlay({ phone: initialPhone, message: initialMessage, countryCode: initialCountryCode })
-    }
-  }, [fromNotif, initialPhone, initialMessage, initialCountryCode])
-
-  // Deep-link state — starts from URL params, updated via server polling
+  // Deep-link state — updated via server polling when a scheduled message is due.
+  // deepLink.phone being non-empty is the trigger for the notification prompt card.
   const [deepLink, setDeepLink] = useState<DeepLink>({
     phone:       initialPhone,
     message:     initialMessage,
     countryCode: initialCountryCode,
   })
+
+  const clearDeepLink = () => setDeepLink({ phone: '', message: '', countryCode: '52' })
 
   // Intercept console.log to show on-screen when ?debug=1
   useEffect(() => {
@@ -63,7 +51,6 @@ function AppContent() {
   }, [debugMode])
 
   useEffect(() => {
-    // Generate or recover anonymous session ID for isolating Google accounts per device
     let id = localStorage.getItem('qz_session_id')
     if (!id) {
       id = crypto.randomUUID()
@@ -71,10 +58,8 @@ function AppContent() {
     }
     setSessionId(id)
 
-    // Register service worker and report its version
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw-custom.js').catch(console.error)
-      // Ask active SW for its version
       navigator.serviceWorker.ready.then((reg) => {
         reg.active?.postMessage({ type: 'GET_VERSION' })
       })
@@ -83,7 +68,6 @@ function AppContent() {
       })
     }
 
-    // Client-side cron fallback (every minute)
     const cronInterval = setInterval(() => {
       fetch('/api/cron/check-messages').catch(() => {})
     }, 60000)
@@ -91,8 +75,8 @@ function AppContent() {
     return () => clearInterval(cronInterval)
   }, [])
 
-  // Deep-link via server polling every second.
-  // Only runs when tab is visible — matches the stable-v1 behavior that was working.
+  // Server poll — fires when the app is visible.
+  // When a pending deeplink is found, shows the notification prompt card.
   useEffect(() => {
     const poll = async () => {
       if (document.visibilityState !== 'visible') return
@@ -102,10 +86,6 @@ function AppContent() {
         if (!data || !data.phone || !data.countryCode) return
         setActiveTab('quick')
         setDeepLink({ phone: data.phone, countryCode: data.countryCode, message: data.message || '' })
-        // Navigate directly to WhatsApp — iOS universal link opens the app instantly.
-        // This is the same approach used in stable-v1 (13c985f) that was working.
-        const fullPhone = `${data.countryCode}${data.phone}`
-        window.location.href = `https://wa.me/${fullPhone}${data.message ? `?text=${encodeURIComponent(data.message)}` : ''}`
       } catch {
         // ignore network errors
       }
@@ -114,7 +94,7 @@ function AppContent() {
     poll()
     const interval = setInterval(poll, 1000)
 
-    // Poll immediately (+ retries) whenever app becomes visible after being backgrounded
+    // Poll immediately (+retries) whenever app comes to the foreground
     const onVisibility = () => {
       if (document.visibilityState !== 'visible') return
       poll()
@@ -130,31 +110,6 @@ function AppContent() {
       document.removeEventListener('visibilitychange', onVisibility)
     }
   }, [])
-
-  // Listen for DEEPLINK postMessage from service worker (instant, no polling delay)
-  useEffect(() => {
-    const handler = (event: MessageEvent) => {
-      console.log('[SW message] received:', event.data)
-      if (event.data?.type !== 'DEEPLINK') return
-      const { phone, countryCode, message } = event.data
-      if (!phone || !countryCode) return
-      console.log('[deeplink] postMessage DEEPLINK → phone=%s | countryCode=%s | message=%s', phone, countryCode, message)
-      setActiveTab('quick')
-      setDeepLink({ phone, countryCode, message: message || '' })
-      setWaOverlay({ phone, countryCode, message: message || '' })
-    }
-    navigator.serviceWorker?.addEventListener('message', handler)
-    return () => navigator.serviceWorker?.removeEventListener('message', handler)
-  }, [])
-
-  const handleWaOverlaySend = () => {
-    if (!waOverlay) return
-    const fullPhone = `${waOverlay.countryCode}${waOverlay.phone.replace(/\D/g, '')}`
-    const waUrl = `https://wa.me/${fullPhone}${waOverlay.message ? `?text=${encodeURIComponent(waOverlay.message)}` : ''}`
-    window.open(waUrl, '_blank')
-    setWaOverlay(null)
-    router.replace('/', { scroll: false })
-  }
 
   const handleTabChange = (tab: Tab) => {
     setActiveTab(tab)
@@ -174,35 +129,13 @@ function AppContent() {
     { id: 'scheduled', label: 'Historial',         icon: '📋' },
   ]
 
+  // Build WhatsApp URL from current deepLink data
+  const deepLinkWaUrl = deepLink.phone
+    ? `https://wa.me/${deepLink.countryCode}${deepLink.phone.replace(/\D/g, '')}${deepLink.message ? `?text=${encodeURIComponent(deepLink.message)}` : ''}`
+    : ''
+
   return (
     <div className="min-h-screen flex flex-col">
-
-      {/* WhatsApp overlay — shown when a scheduled message is ready to send */}
-      {waOverlay && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center px-6 text-center"
-          style={{ background: '#075E54' }}>
-          <div style={{ fontSize: 64, marginBottom: 8 }}>💬</div>
-          <p style={{ color: '#fff', fontWeight: 700, fontSize: 20, marginBottom: 8 }}>
-            Mensaje listo para enviar
-          </p>
-          <p style={{ color: '#a7f3d0', fontSize: 15, marginBottom: 8 }}>
-            +{waOverlay.countryCode}{waOverlay.phone}
-          </p>
-          {waOverlay.message && (
-            <p style={{ color: '#d1fae5', fontSize: 14, marginBottom: 32, background: 'rgba(255,255,255,0.1)', padding: '10px 16px', borderRadius: 12, maxWidth: 320, wordBreak: 'break-word' }}>
-              &ldquo;{waOverlay.message}&rdquo;
-            </p>
-          )}
-          <button onClick={handleWaOverlaySend}
-            style={{ background: '#25D366', color: '#fff', border: 'none', borderRadius: 14, padding: '18px 40px', fontSize: 18, fontWeight: 700, cursor: 'pointer', marginBottom: 8 }}>
-            Abrir WhatsApp
-          </button>
-          <button onClick={() => setWaOverlay(null)}
-            style={{ color: '#a7f3d0', background: 'none', border: 'none', fontSize: 14, cursor: 'pointer', padding: '8px' }}>
-            Cancelar
-          </button>
-        </div>
-      )}
 
       {/* Header */}
       <header
@@ -253,6 +186,52 @@ function AppContent() {
 
       {/* Main content */}
       <main className="flex-1 px-4 py-5 max-w-lg mx-auto w-full space-y-4">
+
+        {/* ── Notification prompt card ──
+            Shown in the normal document flow (not fixed/overlay) when the server
+            poll detects a pending deeplink. deepLink.phone is the reliable trigger:
+            we know setDeepLink works because the form always pre-fills correctly. */}
+        {activeTab === 'quick' && deepLink.phone && (
+          <div style={{
+            background: '#075E54',
+            borderRadius: 16,
+            padding: '20px 20px 16px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            textAlign: 'center',
+            gap: 8,
+          }}>
+            <div style={{ fontSize: 44 }}>💬</div>
+            <p style={{ color: '#fff', fontWeight: 700, fontSize: 17, margin: 0 }}>
+              Mensaje listo para enviar
+            </p>
+            <p style={{ color: '#a7f3d0', fontSize: 14, margin: 0 }}>
+              +{deepLink.countryCode} {deepLink.phone}
+            </p>
+            {deepLink.message && (
+              <p style={{ color: '#d1fae5', fontSize: 13, margin: 0, background: 'rgba(255,255,255,0.1)', padding: '8px 14px', borderRadius: 10, maxWidth: 300, wordBreak: 'break-word' }}>
+                &ldquo;{deepLink.message.substring(0, 80)}{deepLink.message.length > 80 ? '…' : ''}&rdquo;
+              </p>
+            )}
+            <button
+              onClick={() => {
+                window.open(deepLinkWaUrl, '_blank')
+                clearDeepLink()
+              }}
+              style={{ background: '#25D366', color: '#fff', border: 'none', borderRadius: 12, padding: '15px 0', fontSize: 17, fontWeight: 700, cursor: 'pointer', width: '100%', marginTop: 4 }}
+            >
+              Abrir WhatsApp
+            </button>
+            <button
+              onClick={clearDeepLink}
+              style={{ color: '#a7f3d0', background: 'none', border: 'none', fontSize: 13, cursor: 'pointer', padding: 4 }}
+            >
+              Cancelar
+            </button>
+          </div>
+        )}
+
         {activeTab === 'quick' && (
           <QuickSend
             initialPhone={deepLink.phone}
