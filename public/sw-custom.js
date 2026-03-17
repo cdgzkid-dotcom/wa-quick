@@ -1,6 +1,6 @@
 // Custom Service Worker for WA Quick
 // Handles push notifications and offline caching
-const SW_VERSION = '3.10.0'
+const SW_VERSION = '3.11.0'
 
 self.addEventListener('install', (event) => {
   self.skipWaiting()
@@ -59,19 +59,24 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close()
 
   const { action } = event
-  const { url } = event.notification.data
+  const { waUrl, url } = event.notification.data
 
   if (action === 'dismiss') return
 
-  // Any tap (body or 'send' action) — bring the app to the foreground.
-  // The app's poll will detect the pending deeplink and show the card
-  // with "Abrir WhatsApp". The user taps that button (user gesture) and
-  // WhatsApp opens. This is the only reliable path on iOS PWA.
+  if (action === 'send' && waUrl) {
+    // "📤 Enviar ahora" action button — open WhatsApp directly.
+    // This runs inside a notificationclick user-gesture context on iOS 16.4+
+    // so the universal link interception works and WhatsApp opens immediately.
+    event.waitUntil(clients.openWindow(waUrl))
+    return
+  }
+
+  // Body tap — bring the app to the foreground so the deeplink poll
+  // detects the pending record and shows the "Abrir WhatsApp" card.
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
       const appClient = windowClients.find((c) => c.url.startsWith(self.registration.scope))
       if (appClient) return appClient.focus()
-      // Cold start — open the app
       return clients.openWindow(url || '/')
     })
   )
