@@ -44,7 +44,17 @@ function getTimeUntil(dateStr: string) {
   return `en ${minutes}m`
 }
 
-export default function ScheduledList({ refreshKey }: { refreshKey: number }) {
+type DeepLinkData = { phone: string; countryCode: string; message: string }
+
+export default function ScheduledList({
+  refreshKey,
+  deepLink,
+  onClearDeepLink,
+}: {
+  refreshKey: number
+  deepLink?: DeepLinkData
+  onClearDeepLink?: () => void
+}) {
   const [messages, setMessages] = useState<ScheduledMessage[]>([])
   const [loading, setLoading] = useState(true)
   const [deletingId, setDeletingId] = useState<string | null>(null)
@@ -160,6 +170,53 @@ export default function ScheduledList({ refreshKey }: { refreshKey: number }) {
 
   return (
     <div className="space-y-4">
+
+      {/* ── Deeplink banner — shown when a scheduled message just fired ── */}
+      {deepLink && (
+        <div style={{
+          background: 'var(--card)',
+          border: '2px solid #25D366',
+          borderRadius: 14,
+          padding: '14px 16px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+        }}>
+          <div style={{ fontSize: 28, lineHeight: 1 }}>📤</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ margin: 0, fontWeight: 700, fontSize: 14, color: 'var(--text)' }}>
+              +{deepLink.countryCode} {deepLink.phone}
+            </p>
+            {deepLink.message && (
+              <p style={{ margin: 0, fontSize: 12, color: 'var(--text-dim)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {deepLink.message}
+              </p>
+            )}
+          </div>
+          <button
+            onClick={() => {
+              const waUrl = `https://wa.me/${deepLink.countryCode}${deepLink.phone.replace(/\D/g, '')}${deepLink.message ? `?text=${encodeURIComponent(deepLink.message)}` : ''}`
+              fetch('/api/deeplink', { method: 'PATCH' }).catch(() => {})
+              window.open(waUrl, '_blank')
+              onClearDeepLink?.()
+            }}
+            style={{
+              background: '#25D366',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 10,
+              padding: '10px 16px',
+              fontSize: 13,
+              fontWeight: 700,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            Enviar
+          </button>
+        </div>
+      )}
+
       {/* Filter tabs */}
       <div className="card !p-1 flex gap-1">
         {(['pending', 'sent', 'all'] as const).map((f) => (

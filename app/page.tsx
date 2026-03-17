@@ -84,7 +84,7 @@ function AppContent() {
         const res = await fetch('/api/deeplink')
         const data = await res.json()
         if (!data || !data.phone || !data.countryCode) return
-        setActiveTab('quick')
+        setActiveTab('scheduled')
         setDeepLink({ phone: data.phone, countryCode: data.countryCode, message: data.message || '' })
       } catch {
         // ignore network errors
@@ -128,11 +128,6 @@ function AppContent() {
     { id: 'schedule',  label: 'Programar mensaje', icon: '⏰' },
     { id: 'scheduled', label: 'Historial',         icon: '📋' },
   ]
-
-  // Build WhatsApp URL from current deepLink data
-  const deepLinkWaUrl = deepLink.phone
-    ? `https://wa.me/${deepLink.countryCode}${deepLink.phone.replace(/\D/g, '')}${deepLink.message ? `?text=${encodeURIComponent(deepLink.message)}` : ''}`
-    : ''
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -187,55 +182,6 @@ function AppContent() {
       {/* Main content */}
       <main className="flex-1 px-4 py-5 max-w-lg mx-auto w-full space-y-4">
 
-        {/* ── Notification prompt card ──
-            Shown in the normal document flow (not fixed/overlay) when the server
-            poll detects a pending deeplink. deepLink.phone is the reliable trigger:
-            we know setDeepLink works because the form always pre-fills correctly. */}
-        {activeTab === 'quick' && deepLink.phone && (
-          <div style={{
-            background: '#075E54',
-            borderRadius: 16,
-            padding: '20px 20px 16px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            textAlign: 'center',
-            gap: 8,
-          }}>
-            <div style={{ fontSize: 44 }}>💬</div>
-            <p style={{ color: '#fff', fontWeight: 700, fontSize: 17, margin: 0 }}>
-              Mensaje listo para enviar
-            </p>
-            <p style={{ color: '#a7f3d0', fontSize: 14, margin: 0 }}>
-              +{deepLink.countryCode} {deepLink.phone}
-            </p>
-            {deepLink.message && (
-              <p style={{ color: '#d1fae5', fontSize: 13, margin: 0, background: 'rgba(255,255,255,0.1)', padding: '8px 14px', borderRadius: 10, maxWidth: 300, wordBreak: 'break-word' }}>
-                &ldquo;{deepLink.message.substring(0, 80)}{deepLink.message.length > 80 ? '…' : ''}&rdquo;
-              </p>
-            )}
-            <button
-              onClick={() => {
-                fetch('/api/deeplink', { method: 'PATCH' }).catch(() => {})
-                window.open(deepLinkWaUrl, '_blank')
-                clearDeepLink()
-              }}
-              style={{ background: '#25D366', color: '#fff', border: 'none', borderRadius: 12, padding: '15px 0', fontSize: 17, fontWeight: 700, cursor: 'pointer', width: '100%', marginTop: 4 }}
-            >
-              Abrir WhatsApp
-            </button>
-            <button
-              onClick={() => {
-                fetch('/api/deeplink', { method: 'PATCH' }).catch(() => {})
-                clearDeepLink()
-              }}
-              style={{ color: '#a7f3d0', background: 'none', border: 'none', fontSize: 13, cursor: 'pointer', padding: 4 }}
-            >
-              Cancelar
-            </button>
-          </div>
-        )}
-
         {activeTab === 'quick' && (
           <QuickSend
             initialPhone={deepLink.phone}
@@ -244,7 +190,7 @@ function AppContent() {
           />
         )}
         {activeTab === 'schedule'  && <ScheduleMessage onScheduled={handleScheduled} sessionId={sessionId} />}
-        {activeTab === 'scheduled' && <ScheduledList refreshKey={refreshKey} />}
+        {activeTab === 'scheduled' && <ScheduledList refreshKey={refreshKey} deepLink={deepLink.phone ? deepLink : undefined} onClearDeepLink={clearDeepLink} />}
       </main>
 
       {/* Debug log panel — only shown when ?debug=1 */}
