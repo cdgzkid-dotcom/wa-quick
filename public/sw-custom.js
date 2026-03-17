@@ -1,6 +1,6 @@
 // Custom Service Worker for WA Quick
 // Handles push notifications and offline caching
-const SW_VERSION = '3.8.0'
+const SW_VERSION = '3.9.0'
 
 self.addEventListener('install', (event) => {
   self.skipWaiting()
@@ -61,25 +61,23 @@ self.addEventListener('notificationclick', (event) => {
   const { action } = event
   const { waUrl, url } = event.notification.data
 
-  // 'Enviar ahora' action button — open WhatsApp directly from notification
-  // This runs in notificationclick user-gesture context so openWindow works instantly
-  if (action === 'send' && waUrl) {
+  if (action === 'dismiss') return
+
+  // Any tap (body or 'send' action) — open WhatsApp directly from the SW.
+  // The SW already has waUrl in notification.data so no polling or app state needed.
+  // clients.openWindow() runs in notificationclick user-gesture context:
+  // iOS intercepts the wa.me universal link and opens WhatsApp immediately.
+  if (waUrl) {
     event.waitUntil(clients.openWindow(waUrl))
     return
   }
 
-  if (action === 'dismiss') return
-
-  // Body tap — bring existing PWA to focus (poll in page.tsx will navigate to WhatsApp)
-  // If PWA is not running, open WhatsApp directly
+  // Fallback: no waUrl (shouldn't happen) — just open the app
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
       const appClient = windowClients.find((c) => c.url.startsWith(self.registration.scope))
-      if (appClient) {
-        return appClient.focus()
-      }
-      // No PWA running: open WhatsApp URL directly
-      return clients.openWindow(waUrl || url || '/')
+      if (appClient) return appClient.focus()
+      return clients.openWindow(url || '/')
     })
   )
 })
