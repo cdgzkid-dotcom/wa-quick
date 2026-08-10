@@ -24,7 +24,26 @@ export default function BellButton() {
     setSupported(true)
     setDenied(Notification.permission === 'denied')
     navigator.serviceWorker.ready.then((reg) => {
-      reg.pushManager.getSubscription().then((sub) => setSubscribed(!!sub))
+      reg.pushManager.getSubscription().then((sub) => {
+        setSubscribed(!!sub)
+        if (!sub) return
+
+        // Reconciliación navegador ↔ servidor.
+        // La suscripción vive en dos lados: el navegador y la colección
+        // pushsubscriptions. Si la fila del servidor desaparece (así pasó al
+        // morir el cluster el 2026-06-20), el navegador sigue creyéndose
+        // suscrito, el botón se pinta como activo, y el cron no envía nada
+        // porque para él no hay suscriptores. Reenviarla en cada arranque
+        // cierra ese hueco: /api/push/subscribe hace upsert por endpoint,
+        // así que repetirlo es inofensivo.
+        fetch('/api/push/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(sub.toJSON()),
+        }).catch(() => {
+          // Sin red o servidor caído: se reintenta en el siguiente arranque.
+        })
+      })
     })
   }, [])
 

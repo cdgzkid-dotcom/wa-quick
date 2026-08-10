@@ -49,14 +49,20 @@ export async function GET(request: NextRequest) {
     await writeDailyHeartbeat()
 
     const now = new Date()
-    const twoMinutesAgo = new Date(now.getTime() - 2 * 60 * 1000)
 
+    // Sin cota inferior a propósito: basta con que la hora ya haya pasado.
+    // Antes la ventana era [ahora-2min, ahora], así que cualquier hueco del
+    // scheduler mayor a dos minutos dejaba el mensaje varado en notified:false
+    // para siempre — ninguna corrida posterior volvía a verlo. Con `$lte: now`
+    // un mensaje pendiente se notifica en la siguiente corrida, tarde pero
+    // nunca en silencio. `notified` sigue siendo el candado que evita repetir.
+    //
     // Atomically claim messages one by one to prevent race conditions
     // when the cron runs in parallel (find + update in a single operation)
     const pendingMessages = []
     while (true) {
       const claimed = await ScheduledMessage.findOneAndUpdate(
-        { sent: false, notified: false, scheduledAt: { $gte: twoMinutesAgo, $lte: now } },
+        { sent: false, notified: false, scheduledAt: { $lte: now } },
         { notified: true },
         { new: false }
       ).lean()
