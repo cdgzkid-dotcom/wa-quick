@@ -68,11 +68,12 @@ function AppContent() {
       })
     }
 
-    const cronInterval = setInterval(() => {
-      fetch('/api/cron/check-messages').catch(() => {})
-    }, 60000)
-
-    return () => clearInterval(cronInterval)
+    // Aquí vivía un setInterval que llamaba a /api/cron/check-messages cada 60s.
+    // Nunca funcionó ni podía funcionar: la ruta exige Authorization: Bearer
+    // CRON_SECRET y el secreto no puede vivir en el cliente, así que todas esas
+    // llamadas devolvían 401. Lo único que producía era ruido en los logs, que
+    // además confundió el diagnóstico del 2026-08-10 (ver bug #9 en CLAUDE.md).
+    // El cron real lo dispara cron-job.org.
   }, [])
 
   // Server poll — fires when the app is visible.
