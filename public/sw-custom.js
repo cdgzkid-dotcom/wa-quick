@@ -1,6 +1,6 @@
 // Custom Service Worker for WA Quick
 // Handles push notifications and offline caching
-const SW_VERSION = '3.14.0'
+const SW_VERSION = '3.15.0'
 
 self.addEventListener('install', (event) => {
   self.skipWaiting()
@@ -78,14 +78,32 @@ function openApp(appUrl) {
   })
 }
 
+// Cierra el ciclo que antes cerraba handleSendNow() en ScheduledList: marcar el
+// mensaje como atendido y consumir el deeplink. Con el flujo directo la PWA ya no
+// se abre, así que nadie hacía ninguna de las dos cosas y el mensaje se quedaba
+// atascado en Pendientes con el historial de Enviados siempre vacío.
+// keepalive: la petición tiene que sobrevivir a que iOS suspenda el SW cuando
+// WhatsApp pasa a primer plano.
+function markHandled(messageId) {
+  const opts = { method: 'PATCH', keepalive: true }
+  const tasks = [fetch('/api/deeplink', opts).catch(() => {})]
+  if (messageId) {
+    tasks.push(fetch(`/api/messages/${messageId}`, opts).catch(() => {}))
+  }
+  return Promise.all(tasks)
+}
+
 // Try WhatsApp first, fall back to the PWA. openWindow can reject, and on some
 // iOS versions it resolves null even though nothing opened — both cases fall back.
-function openWhatsAppOrApp(waUrl, appUrl) {
+function openWhatsAppOrApp(waUrl, appUrl, messageId) {
   if (!waUrl) return openApp(appUrl)
   // Two-argument then: the rejection handler covers openWindow only. Chaining a
   // .catch() instead would also catch a failing openApp() and retry it twice.
   return clients.openWindow(waUrl).then(
-    (win) => (win ? undefined : openApp(appUrl)),
+    // Solo se marca cuando WhatsApp abrió de verdad. Si caemos al fallback NO se
+    // marca ni se consume el deeplink: la PWA necesita el deeplink vivo para
+    // mostrar el mensaje, y su botón "Enviar ahora" hará el PATCH como siempre.
+    (win) => (win ? markHandled(messageId) : openApp(appUrl)),
     () => openApp(appUrl)
   )
 }
@@ -101,7 +119,7 @@ self.addEventListener('notificationclick', (event) => {
   // Body tap and "📤 Enviar ahora" now do the same thing: open WhatsApp directly.
   // Both run inside the notificationclick user-gesture context, which is what
   // makes iOS 16.4+ intercept the wa.me universal link instead of opening Safari.
-  event.waitUntil(openWhatsAppOrApp(buildWaUrl(data), data.url))
+  event.waitUntil(openWhatsAppOrApp(buildWaUrl(data), data.url, data.messageId))
 })
 
 // Respond to version queries from page.tsx
