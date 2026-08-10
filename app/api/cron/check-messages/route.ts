@@ -3,7 +3,32 @@ import { connectDB } from '@/app/lib/mongoose'
 import ScheduledMessage from '@/app/lib/models/ScheduledMessage'
 import PushSubscription from '@/app/lib/models/PushSubscription'
 import PendingDeepLink from '@/app/lib/models/PendingDeepLink'
+import Heartbeat from '@/app/lib/models/Heartbeat'
 import { sendPushNotification } from '@/app/lib/webpush'
+
+const HEARTBEAT_KEY = 'cluster-keepalive'
+const ONE_DAY_MS = 24 * 60 * 60 * 1000
+
+// Atlas M0 borra clusters inactivos (~60 días) — así murió cluster1 el 2026-06-20.
+// Escribimos como mucho una vez al día, incluso cuando no hay nada que notificar,
+// para que el cluster registre actividad. Nunca debe tumbar al cron: si falla,
+// se loguea y seguimos.
+async function writeDailyHeartbeat() {
+  const now = new Date()
+  try {
+    await Heartbeat.findOneAndUpdate(
+      { key: HEARTBEAT_KEY, lastPing: { $lte: new Date(now.getTime() - ONE_DAY_MS) } },
+      { $set: { lastPing: now } },
+      { upsert: true }
+    )
+  } catch (err) {
+    // E11000 es el caso normal: el doc ya existe y su lastPing es reciente,
+    // así que el filtro no matcheó y el upsert chocó con el índice único.
+    if ((err as { code?: number })?.code !== 11000) {
+      console.error('[cron] heartbeat falló:', err)
+    }
+  }
+}
 
 export async function GET(request: NextRequest) {
   // Vercel Cron sends: Authorization: Bearer {CRON_SECRET}
@@ -18,6 +43,10 @@ export async function GET(request: NextRequest) {
 
   try {
     await connectDB()
+
+    // Antes de cualquier salida temprana: el cluster debe registrar actividad
+    // incluso en los días en que no hay un solo mensaje pendiente.
+    await writeDailyHeartbeat()
 
     const now = new Date()
     const twoMinutesAgo = new Date(now.getTime() - 2 * 60 * 1000)

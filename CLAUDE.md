@@ -19,13 +19,15 @@
 
 ## Infraestructura
 * **Cron:** cron-job.org cada minuto → `/api/cron/check-messages` con `Authorization: Bearer waQuickSecret123`
-* **DB:** MongoDB Atlas cluster1.ryqtobh.mongodb.net, usuario `cdgzkid_db_user`
+* **DB:** MongoDB Atlas cluster0.iamhat3.mongodb.net, base `wa_quick`, usuario `cdgzkid_db_user`
+  * ⚠️ `Cluster0` es COMPARTIDO con otras apps (`qbtracker`, `qb_tracker_pro`, `subscan`). Por eso la URI nombra la base `wa_quick` explícitamente. No borrar el cluster.
+  * El free tier permite un solo M0 por proyecto Atlas, así que no se puede crear otro cluster aparte.
 * **Deploy:** Vercel Hobby (auto-deploy desde GitHub main)
 * **OAuth redirect:** `https://wa.quick.sellia.ai/api/auth/google/callback`
 
 ## Variables de entorno (Vercel)
 * `NEXT_PUBLIC_APP_URL` = `https://wa.quick.sellia.ai`
-* `MONGODB_URI` = `mongodb+srv://cdgzkid_db_user:<password>@cluster1.ryqtobh.mongodb.net/`
+* `MONGODB_URI` = `mongodb+srv://cdgzkid_db_user:<password>@cluster0.iamhat3.mongodb.net/wa_quick?retryWrites=true&w=majority`
 * `CRON_SECRET` = `waQuickSecret123`
 * `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` / `NEXT_PUBLIC_GOOGLE_CLIENT_ID`
 * `NEXT_PUBLIC_VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` / `VAPID_SUBJECT`
@@ -82,6 +84,7 @@
 3. **Google Contacts sessionId** — cada dispositivo tiene su propio sessionId en localStorage
 4. **MongoDB credentials** — contraseña sin caracteres especiales
 5. **PendingDeepLink required field** — `subscriptionEndpoint` debe ser `default: ''` no `required: true`
+6. **Atlas M0 borra clusters inactivos (~60 días)** — `cluster1` murió así el 2026-06-20. Se perdió toda la data (mensajes, tokens de Google, suscripciones push). El cron escribe un heartbeat diario en la colección `heartbeats` para que Atlas registre actividad.
 
 ## Comandos útiles
 ```bash
